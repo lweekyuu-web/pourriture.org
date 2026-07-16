@@ -1,2 +1,0 @@
-# pourriture.org
-just art
