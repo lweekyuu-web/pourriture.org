@@ -1,12 +1,60 @@
 <!DOCTYPE html>
-<html lang="eng">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pourriture</title>
+<meta charset="UTF-8">
+<title>Phrases</title>
+
+<style>
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+#texte{
+    font-size:2rem;
+    text-align:center;
+    opacity:1;
+    transition:opacity .6s;
+}
+</style>
 </head>
-<body style="font-family: Arial, sans-serif; text-align: center; margin-top: 100px;">
-    <h1> zizi </h1>
+<body>
+
+<div id="texte"></div>
+
+<script>
+const phrases = [
+    "Si tu es sur ce site",
+    "C'est soit tu me connais",
+    "sois tu es tomber dessus par hasard",
+    "et au passage ntm"
+];
+
+let index = 0;
+const texte = document.getElementById("texte");
+
+function afficherPhrase() {
+    texte.style.opacity = 0;
+
+    setTimeout(() => {
+        texte.textContent = phrases[index];
+        texte.style.opacity = 1;
+
+        index++;
+        if (index >= phrases.length) index = 0; //
+    }, 600);
+}
+
+
+setInterval(afficherPhrase, 5000);
+</script>
+
 </body>
 </html>
 
