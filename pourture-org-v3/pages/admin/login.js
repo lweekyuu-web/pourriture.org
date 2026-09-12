@@ -19,7 +19,7 @@ export default function AdminLogin() {
 
   return (
     <div className="container">
-      <h1 className="sitetitle">POURTURE.ORG ADMIN</h1>
+      <h1 className="sitetitle">POURRITURE.ORG ADMIN</h1>
       <form onSubmit={submit} className="post">
         <div>Password: <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
         <button type="submit">Login</button>

@@ -105,7 +105,7 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
 
         <WidgetSlot widgets={bottomWidgets} />
 
-        <div id="bottom" className="footer">pourture.org — {thread.board.id}</div>
+        <div id="bottom" className="footer">pourriture.org — {thread.board.id}</div>
       </div>
     </>
   );

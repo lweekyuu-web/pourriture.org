@@ -128,7 +128,7 @@ export default function BoardPage({ board, threads, boardSlug, topWidgets, page,
           </div>
         )}
 
-        <div id="bottom" className="footer">pourture.org — {board.id}</div>
+        <div id="bottom" className="footer">pourriture.org — {board.id}</div>
       </div>
     </>
   );

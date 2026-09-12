@@ -1,4 +1,4 @@
-# Base44 Dev Environment — POURTURE.ORG
+# Base44 Dev Environment — POURRITURE.ORG
 
 ## Project
 Next.js 14 (pages router) + Prisma + PostgreSQL imageboard/forum prototype.
@@ -6,7 +6,7 @@ Source lives in `pourture-org-v3/` (not repo root).
 
 ## Stack & Setup
 - **Runtime**: Node 22 (`node:22` base image), Next.js 14.2.5 dev server
-- **Database**: PostgreSQL 16 (`postgres:16-alpine`), user/db `pourture`, password `pourture_dev`
+- **Database**: PostgreSQL 16 (`postgres:16-alpine`), user/db `pourriture`, password `pourriture_dev`
 - **ORM**: Prisma 5.18 — schema at `pourture-org-v3/prisma/schema.prisma` (provider: `postgresql`)
 - **Seed**: `pourture-org-v3/prisma/seed.js` — creates 6 boards, demo users, threads, posts
 

@@ -29,7 +29,7 @@ export default function AdminDashboard({ stats }) {
 
   return (
     <div className="container">
-      <h1 className="sitetitle">POURTURE.ORG ADMIN</h1>
+      <h1 className="sitetitle">POURRITURE.ORG ADMIN</h1>
       <pre>{`Boards: ${stats.boards}
 Threads: ${stats.threads}
 Posts: ${stats.posts}

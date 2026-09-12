@@ -1,7 +1,7 @@
 // Auth admin volontairement simple pour un prototype local.
 // NE PAS utiliser tel quel en production publique.
 const cookie = require('cookie');
-const ADMIN_COOKIE = 'pourture_admin';
+const ADMIN_COOKIE = 'pourriture_admin';
 
 function isAdminRequest(req) {
   const parsed = cookie.parse(req.headers.cookie || '');

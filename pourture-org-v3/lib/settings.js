@@ -2,10 +2,10 @@
 const prisma = require('./prisma');
 
 const DEFAULTS = {
-  site_title: 'POURTURE.ORG',
+  site_title: 'POURRITURE.ORG',
   site_tagline: 'a slow forgotten corner of the internet',
   motd: '',
-  footer_text: 'pourture.org — prototype expérimental — contenu fictif',
+  footer_text: 'pourriture.org — prototype expérimental — contenu fictif',
   rules_text: 'Be excellent to each other. No real names, no real addresses, no real threats.',
   threads_per_page: '10',
 };

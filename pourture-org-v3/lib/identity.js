@@ -3,7 +3,7 @@
 const crypto = require('crypto');
 const cookie = require('cookie');
 
-const COOKIE_NAME = 'pourture_uid';
+const COOKIE_NAME = 'pourriture_uid';
 
 function generateAnonId() {
   // ex: A81F29
