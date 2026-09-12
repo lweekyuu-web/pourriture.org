@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pourriture
+      POSTGRES_PASSWORD: pourriture_dev
+      POSTGRES_DB: pourriture
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pourriture"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  setup:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      - DATABASE_URL=postgresql://pourriture:pourriture_dev@db:5432/pourriture
+      - DIRECT_URL=postgresql://pourriture:pourriture_dev@db:5432/pourriture
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npm install && npx prisma generate && npx prisma db push --accept-data-loss && node prisma/seed.js"
+
+  app:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://pourriture:pourriture_dev@db:5432/pourriture
+      - DIRECT_URL=postgresql://pourriture:pourriture_dev@db:5432/pourriture
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+    env_file:
+      - ./.env.base44-defaults
+      - /run/base44/app.env
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    command: sh -c "npm run dev -- -H 0.0.0.0"
+
+volumes:
+  pgdata:
