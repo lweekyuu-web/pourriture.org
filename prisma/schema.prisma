@@ -21,12 +21,11 @@ model User {
   createdAt       DateTime  @default(now())
   postCount       Int       @default(0)
   badge           String    @default("Newbie")
-  role            String    @default("user") // user | moderator | administrator
-  status          String    @default("New user") // New user | Regular | Veteran | Moderator | Administrator | Suspended | Banned
+  role            String    @default("user")
+  status          String    @default("New user")
   banned          Boolean   @default(false)
   suspendedUntil  DateTime?
-  
-  // Profile customization
+
   avatarId        String?
   avatar          Avatar?   @relation("UserAvatar", fields: [avatarId], references: [id])
   bannerUrl       String?
@@ -35,7 +34,7 @@ model User {
   selectedGifId   String?
   profileGif      ProfileGif? @relation("UserProfileGif", fields: [selectedGifId], references: [id])
   profileTheme    String?   @default("default")
-  
+
   posts           Post[]
   warnings        Warning[]
   modActions      ModerationAction[] @relation("ModeratorActions")
@@ -51,7 +50,7 @@ model Board {
   name        String
   description String
   rules       String?
-  status      String   @default("public") // public | private | disabled
+  status      String   @default("public")
   createdAt   DateTime @default(now())
   threads     Thread[]
   moderators  BoardModerator[]
@@ -73,7 +72,7 @@ model Thread {
 
 model Post {
   id          Int       @id @default(autoincrement())
-  postNumber   String    @unique
+  postNumber  String    @unique
   threadId    Int
   thread      Thread    @relation(fields: [threadId], references: [id])
   authorId    String?
@@ -84,7 +83,7 @@ model Post {
   createdAt   DateTime  @default(now())
   editedAt    DateTime?
   hidden      Boolean   @default(false)
-  status      String    @default("active") // active | hidden | deleted
+  status      String    @default("active")
   reports     Report[]
 }
 
@@ -94,21 +93,21 @@ model Report {
   post       Post     @relation(fields: [postId], references: [id])
   reason     String
   details    String?  @db.Text
-  status     String   @default("pending") // pending | resolved | dismissed
+  status     String   @default("pending")
   createdAt  DateTime @default(now())
   resolvedAt DateTime?
   resolvedBy String?
 }
 
 model Warning {
-  id         Int       @id @default(autoincrement())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id])
-  reason     String
-  duration   String    // 24h | 3d | 7d | permanent
-  expiresAt  DateTime?
+  id          Int       @id @default(autoincrement())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  reason      String
+  duration    String
+  expiresAt   DateTime?
   moderatorId String?
-  createdAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
 }
 
 model BoardModerator {
@@ -118,7 +117,7 @@ model BoardModerator {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   permissions String[] @default(["VIEW_REPORTS", "MODERATE_POSTS", "LOCK_THREADS"])
-  createdAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   @@unique([boardId, userId])
 }
@@ -138,10 +137,10 @@ model ModerationAction {
   moderatorId String?
   moderator   User?    @relation("ModeratorActions", fields: [moderatorId], references: [id])
   action      String
-  targetType   String
-  targetId     String
+  targetType  String
+  targetId    String
   reason      String?  @db.Text
-  createdAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Widget {
@@ -159,8 +158,6 @@ model Widget {
   createdAt   DateTime @default(now())
 }
 
-// Profile Customization Models
-
 model Avatar {
   id              String    @id @default(cuid())
   userId          String
@@ -172,62 +169,63 @@ model Avatar {
   mimeType        String
   width           Int?
   height          Int?
-  status          String    @default("PENDING") // PENDING | APPROVED | REJECTED | REVIEW_REQUIRED
+  status          String    @default("PENDING")
   moderationNote  String?   @db.Text
   uploadedAt      DateTime  @default(now())
   moderatedAt     DateTime?
   moderatedBy     String?
-  aiReviewId      String?
-  aiReview        AIModeration Result? @relation(fields: [aiReviewId], references: [id])
+  aiReviewId      String?   @unique
+  aiReview        AIModerationResult? @relation(fields: [aiReviewId], references: [id])
 
   @@index([userId])
   @@index([status])
 }
 
 model ProfileCustomization {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id])
-  theme           String    @default("default") // default | dark | retro | blue
-  accentColor     String    @default("#0066cc")
-  showPostCount   Boolean   @default(true)
-  showJoinDate    Boolean   @default(true)
-  profileLayout   String    @default("standard") // standard | compact | detailed
-  updatedAt       DateTime  @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  theme           String   @default("default")
+  accentColor     String   @default("#0066cc")
+  showPostCount   Boolean  @default(true)
+  showJoinDate    Boolean  @default(true)
+  profileLayout   String   @default("standard")
+  updatedAt       DateTime @updatedAt
 }
 
 model ProfileGif {
-  id              String    @id @default(cuid())
-  userId          String
-  user            User      @relation("UserProfileGifs", fields: [userId], references: [id])
-  primaryUser     User?     @relation("UserProfileGif")
-  gifId           String    // Reference to external GIF library (Giphy, etc.)
-  gifUrl          String
-  gifTitle        String
-  category        String
-  addedAt         DateTime  @default(now())
-  active          Boolean   @default(true)
-  status          String    @default("APPROVED") // APPROVED | FLAGGED | BANNED
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("UserProfileGifs", fields: [userId], references: [id])
+  primaryUser User?     @relation("UserProfileGif")
+  gifId       String
+  gifUrl      String
+  gifTitle    String
+  category    String
+  addedAt     DateTime  @default(now())
+  active      Boolean   @default(true)
+  status      String    @default("APPROVED")
 
   @@index([userId])
+  @@unique([userId, gifId])
 }
 
 model AIModerationResult {
-  id              String    @id @default(cuid())
-  targetType      String    // "avatar" | "signature" | "bio" | "gif"
+  id              String   @id @default(cuid())
+  targetType      String
   targetId        String
   userId          String
-  decision        String    @default("UNCERTAIN") // SAFE | UNCERTAIN | UNSAFE
-  confidence      Float     // 0-1 confidence score
-  reasons         String[]  @default([]) // Array of detected issues
-  flaggedKeywords String[]  @default([])
-  details         String?   @db.Text // JSON details of analysis
-  aiModel         String    @default("default-moderation-v1")
+  decision        String   @default("UNCERTAIN")
+  confidence     Float
+  reasons         String[] @default([])
+  flaggedKeywords String[] @default([])
+  details         String?  @db.Text
+  aiModel         String   @default("default-moderation-v1")
   reviewedAt      DateTime?
   reviewedBy      String?
-  reviewDecision  String?   // APPROVED | REJECTED | FALSE_POSITIVE | UNCERTAIN
-  reviewNotes     String?   @db.Text
-  createdAt       DateTime  @default(now())
+  reviewDecision  String?
+  reviewNotes     String?  @db.Text
+  createdAt       DateTime @default(now())
   avatar          Avatar?
 
   @@index([targetType, targetId])
@@ -236,18 +234,18 @@ model AIModerationResult {
 }
 
 model ModerationLog {
-  id              String    @id @default(cuid())
-  moderatorId     String?
-  moderator       User?     @relation(fields: [moderatorId], references: [id])
-  action          String    // AVATAR_APPROVED | AVATAR_REJECTED | AI_REVIEW | OVERRIDE | etc.
-  targetType      String
-  targetId        String
-  targetUserId    String
-  reason          String?   @db.Text
-  previousState   String?   @db.Text // JSON of previous state
-  newState        String?   @db.Text // JSON of new state
-  aiDecisionUsed  Boolean   @default(false)
-  createdAt       DateTime  @default(now())
+  id             String   @id @default(cuid())
+  moderatorId    String?
+  moderator      User?    @relation(fields: [moderatorId], references: [id])
+  action         String
+  targetType     String
+  targetId       String
+  targetUserId   String
+  reason         String?  @db.Text
+  previousState  String?  @db.Text
+  newState       String?  @db.Text
+  aiDecisionUsed Boolean  @default(false)
+  createdAt      DateTime @default(now())
 
   @@index([targetType, targetId])
   @@index([targetUserId])
