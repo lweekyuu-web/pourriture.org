@@ -15,7 +15,7 @@ export async function getServerSideProps({ req }) {
 
 function fmt(dateStr) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' });
 }
 
 export default function AdminUsers({ users: initialUsers }) {

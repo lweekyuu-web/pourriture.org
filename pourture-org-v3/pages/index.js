@@ -47,8 +47,8 @@ export async function getServerSideProps({ req }) {
 
 function fmt(dateStr) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) +
-    ' ' + d.toLocaleTimeString('en-GB');
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' }) +
+    ' ' + d.toLocaleTimeString('en-GB', { timeZone: 'utc' });
 }
 
 export default function Home({ boards, topWidgets, bottomWidgets, settings, isAdmin }) {
