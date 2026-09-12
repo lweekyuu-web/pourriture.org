@@ -8,29 +8,5 @@ export async function getServerSideProps({ req }) {
   }
   const [boards, threads, posts, users, reports] = await Promise.all([
     prisma.board.count(),
-    prisma.thread.count(),
-    prisma.post.count(),
-    prisma.user.count(),
-    prisma.report.count({ where: { resolved: false } }),
-  ]);
-  return { props: { stats: { boards, threads, posts, users, reports } } };
-}
-
-export default function AdminDashboard({ stats }) {
-  return (
-    <div className="container">
-      <h1 className="sitetitle">POURTURE.ORG ADMIN</h1>
-      <pre>{`Boards: ${stats.boards}
-Threads: ${stats.threads}
-Posts: ${stats.posts}
-Users: ${stats.users}
-Reports: ${stats.reports}`}</pre>
-      <p>
-        [<Link href="/admin/boards">Boards</Link>]{' '}
-        [<Link href="/admin/reports">Reports</Link>]{' '}
-        [<Link href="/admin/widgets">Widgets / Ads</Link>]{' '}
-        [<Link href="/">Back to site</Link>]
-      </p>
-    </div>
-  );
+…  );
 }
