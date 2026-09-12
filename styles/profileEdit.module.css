@@ -1,0 +1,200 @@
+/* Profile Edit Form - Old Web Style */
+
+.container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 15px;
+  font-family: Arial, Verdana, sans-serif;
+}
+
+.container h1 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  text-align: center;
+  border-bottom: 2px solid #0066cc;
+  padding-bottom: 10px;
+}
+
+.message {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #999;
+  background: #ffffcc;
+  color: #333;
+  font-size: 13px;
+  border-left: 4px solid #ff9900;
+}
+
+.form {
+  background: white;
+  border: 1px solid #999;
+  padding: 20px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="file"],
+.formGroup textarea,
+.formGroup select {
+  padding: 8px;
+  border: 1px solid #999;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  background: white;
+  color: #333;
+}
+
+.formGroup input[type="text"],
+.formGroup textarea,
+.formGroup select {
+  resize: vertical;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border: 1px solid #0066cc;
+  box-shadow: inset 0 0 3px rgba(0, 102, 204, 0.3);
+}
+
+.formGroup small {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+}
+
+.pending {
+  margin-top: 8px;
+  padding: 8px;
+  background: #ffffcc;
+  border: 1px solid #ff9900;
+  font-size: 12px;
+  color: #cc6600;
+}
+
+.rejected {
+  margin-top: 8px;
+  padding: 8px;
+  background: #ffcccc;
+  border: 1px solid #cc0000;
+  font-size: 12px;
+  color: #990000;
+}
+
+.gifSearch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.gifSearch input[type="text"] {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #999;
+  font-size: 13px;
+}
+
+.gifSearch button {
+  padding: 8px 15px;
+  background: #0066cc;
+  color: white;
+  border: 1px solid #003399;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.gifSearch button:hover {
+  background: #0052a3;
+}
+
+.gifGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gifItem {
+  border: 2px solid #ccc;
+  padding: 5px;
+  cursor: pointer;
+  background: #f9f9f9;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.gifItem:hover {
+  border-color: #0066cc;
+  background: #fffbf0;
+}
+
+.gifItem.selected {
+  border-color: #0066cc;
+  background: #e6f2ff;
+  font-weight: bold;
+}
+
+.gifItem img {
+  width: 100%;
+  height: 70px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.gifItem small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  background: #0066cc;
+  color: white;
+  border: 2px solid #003399;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #0052a3;
+}
+
+.submitBtn:disabled {
+  background: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+  .form {
+    padding: 15px;
+  }
+
+  .gifGrid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+}

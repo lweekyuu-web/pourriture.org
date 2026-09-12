@@ -1,0 +1,279 @@
+/* AI Moderation Review - Moderator Panel */
+
+.container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 15px;
+  font-family: Arial, Verdana, sans-serif;
+}
+
+.container h1 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid #cc0000;
+  padding-bottom: 10px;
+}
+
+.filterBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filterBtn {
+  padding: 8px 15px;
+  background: #f0f0f0;
+  border: 1px solid #999;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterBtn:hover {
+  background: #e0e0e0;
+}
+
+.filterBtn.active {
+  background: #0066cc;
+  color: white;
+  border: 1px solid #003399;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f5f5f5;
+  border: 1px solid #999;
+  color: #666;
+  font-size: 14px;
+}
+
+.reviewCard {
+  background: white;
+  border: 2px solid #999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header {
+  padding: 15px 20px;
+  border-bottom: 2px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9f9f9;
+}
+
+.status {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 12px;
+  font-weight: bold;
+  font-size: 12px;
+  border: 1px solid #666;
+  background: #fff9e6;
+  color: #cc6600;
+  text-transform: uppercase;
+}
+
+.confidence {
+  font-weight: bold;
+  font-size: 14px;
+  color: #0066cc;
+}
+
+.preview {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  background: #fafafa;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border: 2px solid #999;
+}
+
+.textPreview {
+  background: white;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 13px;
+  max-width: 500px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.details {
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+  background: white;
+}
+
+.reasons {
+  margin-bottom: 15px;
+}
+
+.reasons strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+.reasons ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reasons li {
+  padding: 5px 0;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 1px dotted #ddd;
+}
+
+.reasons li:last-child {
+  border-bottom: none;
+}
+
+.keywords {
+  margin-top: 15px;
+}
+
+.keywords strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+.keyword {
+  display: inline-block;
+  background: #ffcccc;
+  color: #990000;
+  padding: 3px 8px;
+  margin: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  border: 1px solid #cc0000;
+}
+
+.reviewed {
+  padding: 15px 20px;
+  background: #e6ffe6;
+  border: 1px solid #00cc00;
+  margin: 15px 20px;
+  font-size: 12px;
+}
+
+.reviewed p {
+  margin: 5px 0;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+  background: #f5f5f5;
+}
+
+.actions button {
+  padding: 10px;
+  border: 2px solid #666;
+  background: white;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.approve {
+  color: #009900;
+  border-color: #009900;
+}
+
+.approve:hover:not(:disabled) {
+  background: #e6ffe6;
+}
+
+.reject {
+  color: #cc0000;
+  border-color: #cc0000;
+}
+
+.reject:hover:not(:disabled) {
+  background: #ffcccc;
+}
+
+.falsePositive {
+  color: #ff9900;
+  border-color: #ff9900;
+}
+
+.falsePositive:hover:not(:disabled) {
+  background: #fffbf0;
+}
+
+.uncertain {
+  color: #0066cc;
+  border-color: #0066cc;
+}
+
+.uncertain:hover:not(:disabled) {
+  background: #e6f2ff;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f9f9f9;
+  border-top: 1px solid #ddd;
+}
+
+.navigation button {
+  padding: 8px 12px;
+  background: #0066cc;
+  color: white;
+  border: 1px solid #003399;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.navigation button:hover:not(:disabled) {
+  background: #0052a3;
+}
+
+.navigation button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.navigation span {
+  font-weight: bold;
+  font-size: 12px;
+  color: #333;
+}
