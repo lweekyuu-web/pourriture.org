@@ -1,4 +1,4 @@
-# POURTURE.ORG (prototype)
+# POURRITURE.ORG (prototype)
 
 Simulation fictive d'un vieux forum/imageboard (esthétique ~2005-2012). Contenu de démo entièrement fictif, texte uniquement (pas d'upload d'images/fichiers).
 
@@ -10,7 +10,7 @@ Simulation fictive d'un vieux forum/imageboard (esthétique ~2005-2012). Contenu
 ## Déploiement en ligne (sans terminal) — Vercel + Neon
 
 1. Crée une base gratuite sur https://neon.tech (ou https://vercel.com/storage/postgres), récupère la "connection string" (commence par `postgresql://...`).
-2. Sur https://vercel.com, clique "Add New Project" → importe ton dépôt GitHub `pourture-org` (à la racine, pas dans un sous-dossier).
+2. Sur https://vercel.com, clique "Add New Project" → importe ton dépôt GitHub `pourriture-org` (à la racine, pas dans un sous-dossier).
 3. Dans les "Environment Variables" du projet Vercel, ajoute :
    - `DATABASE_URL` = ta connection string Neon
    - `ADMIN_PASSWORD` = un mot de passe fort de ton choix
@@ -92,7 +92,7 @@ Note sécurité : le contenu "html" est injecté tel quel sur le site (`dangerou
 ## Structure du projet
 
 ```
-pourture-org/
+pourriture-org/
   public/
     logo.svg               # bannière logo "vieux web" verte/usée
   prisma/

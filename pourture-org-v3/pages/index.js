@@ -47,8 +47,8 @@ export async function getServerSideProps({ req }) {
 
 function fmt(dateStr) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }) +
-    ' ' + d.toLocaleTimeString('en-GB');
+  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' }) +
+    ' ' + d.toLocaleTimeString('en-GB', { timeZone: 'utc' });
 }
 
 export default function Home({ boards, topWidgets, bottomWidgets, settings, isAdmin }) {
@@ -79,7 +79,7 @@ export default function Home({ boards, topWidgets, bottomWidgets, settings, isAd
   return (
     <>
       <div className="topnav">
-        [<Link href="/">Return</Link>] [<Link href="/catalogue">Catalogue</Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]
+        [<Link href="/">Return</Link>] [<Link href="/catalog">Catalog</Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]
       </div>
       <div className="container">
         <div className="site-logo-text">

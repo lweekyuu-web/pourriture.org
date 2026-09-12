@@ -1,0 +1,19 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "ADMIN_PASSWORD",
+      "description": "Password for the admin login page at /admin/login",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "SESSION_SECRET",
+      "description": "Random string used to sign the admin session cookie",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    }
+  ]
+}

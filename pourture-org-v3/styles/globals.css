@@ -13,10 +13,54 @@ body {
 a { color: #0000ee; text-decoration: underline; }
 a:visited { color: #551a8b; }
 
-.topnav {
+/* --- Site header (global nav) --- */
+.site-header {
   background: #d6daf0;
   border-bottom: 1px solid #b7c5d9;
   padding: 4px 8px;
+  font-size: 12px;
+}
+.site-header-logo {
+  display: inline-block;
+  margin-right: 12px;
+}
+.wordmark-link {
+  font-family: 'Arial Black', Impact, Haettenschweiler, sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #2f6b2f;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+.wordmark-link:visited { color: #2f6b2f; }
+.site-header-nav {
+  display: inline-block;
+}
+.site-header-identity {
+  float: right;
+  font-size: 11px;
+  color: #555;
+}
+.anon-id { color: #117743; font-weight: bold; }
+
+/* --- Site footer --- */
+.site-footer {
+  text-align: center;
+  font-size: 10px;
+  color: #888;
+  margin-top: 30px;
+  padding: 10px;
+  border-top: 1px solid #b7c5d9;
+  background: #e4e7f2;
+}
+.footer-links { margin-bottom: 6px; }
+.footer-info { line-height: 1.6; }
+
+/* --- Top nav (page-specific) --- */
+.topnav {
+  background: #d6daf0;
+  border-bottom: 1px solid #b7c5d9;
+  padding: 3px 8px;
   font-size: 12px;
 }
 .topnav a { margin-right: 6px; color: #0000ee; }
@@ -30,8 +74,35 @@ h1.sitetitle {
   margin: 10px 0 4px 0;
   font-family: Arial, sans-serif;
 }
+h2.mod-subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 10px 0;
+  font-family: Tahoma, sans-serif;
+}
 .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 14px; }
 
+.stats-block {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: #f9f9ff;
+  border: 1px solid #b7c5d9;
+  padding: 8px;
+  margin: 10px 0;
+}
+
+.notification {
+  background: #fff8d6;
+  border: 1px solid #d9c46a;
+  color: #665500;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+/* --- MOTD --- */
 .motd-editor {
   border: 1px dashed #af0a0f;
   background: #fff0f0;
@@ -52,6 +123,7 @@ h1.sitetitle {
   white-space: pre-wrap;
 }
 
+/* --- Board list (homepage) --- */
 .board-row {
   border: 1px solid #b7c5d9;
   background: #f9f9ff;
@@ -62,6 +134,27 @@ h1.sitetitle {
 .board-row .desc { color: #555; font-size: 12px; }
 .board-row .meta { font-size: 11px; color: #777; margin-top: 2px; }
 
+/* --- Catalog filters --- */
+.catalog-filters {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+/* --- Thread listing --- */
+.thread-listing { margin-bottom: 4px; }
+.thread-head { margin-bottom: 4px; }
+.thread-num { color: #af0a0f; font-weight: bold; font-size: 11px; }
+.thread-meta { font-size: 11px; color: #777; }
+
+/* --- Thread indicators --- */
+.thread-indicators { font-size: 11px; }
+.indicator { font-size: 10px; font-weight: bold; margin-left: 2px; }
+.indicator.sticky { color: #cc6600; }
+.indicator.locked { color: #af0a0f; }
+.indicator.archived { color: #777; }
+
+/* --- Pagination --- */
 .pagination {
   text-align: center;
   margin: 10px 0;
@@ -74,6 +167,7 @@ h1.sitetitle {
   color: #af0a0f;
 }
 
+/* --- Posts --- */
 .post {
   border: 1px solid #b7c5d9;
   background: #f9f9ff;
@@ -89,13 +183,18 @@ h1.sitetitle {
   margin-left: 4px;
   background: #e0e0e0;
 }
+.post .op-badge { color: #af0a0f; border-color: #af0a0f; background: #fff0f0; }
 .post .postnum { color: #789922; margin-left: 6px; font-size: 11px; }
 .post .date { color: #333; font-size: 11px; margin-left: 6px; }
 .post .content { white-space: pre-wrap; margin: 4px 0; }
 .post .actions a { font-size: 11px; margin-right: 8px; }
 .post .quote { color: #789922; }
 
-textarea, input[type=text], select {
+/* --- User status & badges --- */
+.user-status { font-size: 10px; color: #777; margin-left: 4px; }
+
+/* --- Forms --- */
+textarea, input[type=text], input[type=password], input[type=number], select {
   font-family: Verdana, Arial, sans-serif;
   font-size: 12px;
   border: 1px solid #999;
@@ -112,6 +211,7 @@ button, input[type=submit] {
 }
 button:hover { background: #d4d4d4; }
 
+/* --- Admin tables --- */
 table.admin { border-collapse: collapse; width: 100%; font-size: 12px; }
 table.admin td, table.admin th {
   border: 1px solid #b7c5d9;
@@ -120,6 +220,7 @@ table.admin td, table.admin th {
 }
 table.admin th { background: #d6daf0; }
 
+/* --- Footer (page-specific) --- */
 .footer { text-align: center; font-size: 10px; color: #888; margin-top: 30px; padding: 10px; }
 
 /* --- Widgets / publicités --- */
@@ -140,6 +241,8 @@ table.admin th { background: #d6daf0; }
   color: #999;
   text-transform: uppercase;
 }
+
+/* --- Site logo text (homepage) --- */
 .site-logo-text {
   text-align: center;
   margin: 10px auto 0 auto;
@@ -160,4 +263,92 @@ table.admin th { background: #d6daf0; }
   font-size: 10px;
   color: #6b6b58;
   margin-top: 4px;
+}
+
+/* --- Search --- */
+.search-form { margin-bottom: 16px; }
+.search-form input[type=text] { width: 200px; }
+.search-result { font-size: 12px; }
+
+/* --- Profile --- */
+.profile-box { margin: 10px 0; }
+
+/* --- Rules / FAQ --- */
+.rules-section, .faq-section { margin: 10px 0; }
+.rules-section h3, .faq-section h3 {
+  font-size: 14px;
+  color: #333;
+  margin: 14px 0 6px 0;
+  font-family: Tahoma, sans-serif;
+}
+.rules-text {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  margin: 4px 0;
+}
+.board-rules {
+  border: 1px solid #d9c46a;
+  background: #fff8d6;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+.last-modified {
+  font-size: 10px;
+  color: #999;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+/* --- Archive --- */
+.archive-note {
+  font-size: 10px;
+  color: #999;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+/* --- 404 / Error pages --- */
+.error-page {
+  text-align: center;
+  padding: 40px 0;
+}
+.error-page h2 {
+  font-size: 18px;
+  color: #af0a0f;
+  font-family: Arial, sans-serif;
+}
+.locked-notice {
+  text-align: center;
+  color: #af0a0f;
+  font-size: 12px;
+  padding: 10px;
+}
+
+/* --- Moderator space --- */
+.mod-subtitle { font-family: Tahoma, sans-serif; }
+.warn-form { background: #fff8d6; border-color: #d9c46a; }
+.perm-list { margin: 6px 0; }
+.perm-list label { display: inline-block; margin-right: 12px; font-size: 11px; }
+
+/* --- Report items --- */
+.report-item { border-color: #d9c46a; }
+
+/* --- Muted text --- */
+.muted { color: #999; font-size: 11px; }
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  body { font-size: 12px; }
+  .site-header-nav { display: block; }
+  .site-header-identity { float: none; display: block; margin-top: 2px; }
+  .container { padding: 4px; }
+  h1.sitetitle { font-size: 18px; }
+  .site-logo-text .wordmark { font-size: 22px; }
+  table.admin { font-size: 11px; }
+  table.admin td, table.admin th { padding: 2px 3px; }
+  textarea { width: 100%; }
+  .post { padding: 4px 6px; }
+  .thread-meta { font-size: 10px; }
 }

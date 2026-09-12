@@ -24,6 +24,16 @@ export default async function handler(req, res) {
       await prisma.moderationAction.create({
         data: { action: 'unban_user', targetType: 'user', targetId: userId },
       });
+    } else if (action === 'set_role') {
+      const { role } = req.body;
+      if (!['user', 'moderator', 'administrator'].includes(role)) {
+        return res.status(400).json({ error: 'Invalid role' });
+      }
+      const statusMap = { user: 'Regular', moderator: 'Moderator', administrator: 'Administrator' };
+      await prisma.user.update({ where: { id: userId }, data: { role, status: statusMap[role] } });
+      await prisma.moderationAction.create({
+        data: { moderatorId: userId, action: 'set_role', targetType: 'user', targetId: userId, reason: `role: ${role}` },
+      });
     } else {
       return res.status(400).json({ error: 'Unknown action' });
     }

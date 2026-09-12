@@ -37,6 +37,9 @@ export default async function handler(req, res) {
     },
   });
 
+  // Bump the thread
+  await prisma.thread.update({ where: { id: threadId }, data: { bumpedAt: new Date() } });
+
   if (uid) {
     await prisma.user.update({ where: { id: uid }, data: { postCount: { increment: 1 } } });
   }
