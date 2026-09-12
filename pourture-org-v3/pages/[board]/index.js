@@ -9,17 +9,20 @@ export async function getServerSideProps({ params, query }) {
   const boardId = '/' + params.board + '/';
   const board = await prisma.board.findUnique({ where: { id: boardId } });
   if (!board) return { notFound: true };
+  if (board.status === 'disabled') return { notFound: true };
 
   const perPageSetting = await getSetting('threads_per_page');
   const perPage = Math.max(1, parseInt(perPageSetting, 10) || 10);
   const page = Math.max(1, parseInt(query.page, 10) || 1);
 
-  const totalThreads = await prisma.thread.count({ where: { boardId } });
+  const where = { boardId, archived: false };
+  const totalThreads = await prisma.thread.count({ where });
   const totalPages = Math.max(1, Math.ceil(totalThreads / perPage));
 
+  // Sticky threads first, then by bumpedAt desc
   const threads = await prisma.thread.findMany({
-    where: { boardId },
-    orderBy: { createdAt: 'desc' },
+    where,
+    orderBy: [{ sticky: 'desc' }, { bumpedAt: 'desc' }],
     skip: (page - 1) * perPage,
     take: perPage,
     include: {
@@ -28,12 +31,23 @@ export async function getServerSideProps({ params, query }) {
     },
   });
 
+  // Get last post info for each thread
+  const threadsWithLast = await Promise.all(
+    threads.map(async (t) => {
+      const lastPost = await prisma.post.findFirst({
+        where: { threadId: t.id },
+        orderBy: { createdAt: 'desc' },
+      });
+      return { ...t, lastPost: lastPost ? { displayName: lastPost.displayName, createdAt: lastPost.createdAt.toISOString() } : null };
+    })
+  );
+
   const topWidgets = await getWidgetsForSlot('board_top');
 
   return {
     props: {
       board: JSON.parse(JSON.stringify(board)),
-      threads: JSON.parse(JSON.stringify(threads)),
+      threads: JSON.parse(JSON.stringify(threadsWithLast)),
       boardSlug: params.board,
       topWidgets,
       page,
@@ -75,11 +89,18 @@ export default function BoardPage({ board, threads, boardSlug, topWidgets, page,
   return (
     <>
       <div className="topnav">
-        [<Link href="/">Return</Link>] [<a href="#" onClick={() => setShowNew(!showNew)}>New Thread</a>] [<a href="#bottom">Bottom</a>]
+        [<Link href="/">Return</Link>] [<a href="#" onClick={(e) => { e.preventDefault(); setShowNew(!showNew); }}>New Thread</a>] [<Link href="/catalog">Catalog</Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>Update</a>]
       </div>
       <div className="container">
         <h1 className="sitetitle">{board.id} — {board.name}</h1>
         <div className="subtitle">{board.description}</div>
+
+        {board.rules && (
+          <div className="board-rules">
+            <b>{board.id} RULES</b>
+            <pre className="rules-text">{board.rules}</pre>
+          </div>
+        )}
 
         <WidgetSlot widgets={topWidgets} />
 
@@ -95,12 +116,20 @@ export default function BoardPage({ board, threads, boardSlug, topWidgets, page,
           </div>
         )}
 
-        {threads.length === 0 && <p>No threads yet.</p>}
+        {threads.length === 0 && <p>No threads yet. Be the first to post.</p>}
 
         {threads.map((t) => (
-          <div className="post" key={t.id}>
-            {t.subject && <b>{t.subject}</b>}
-            {t.locked && <span> [Thread locked]</span>}
+          <div className="post thread-listing" key={t.id}>
+            <div className="thread-head">
+              <span className="thread-num">[{t.id}]</span>{' '}
+              {t.sticky && <span className="indicator sticky">[STICKY]</span>}
+              {t.locked && <span className="indicator locked">[LOCKED]</span>}
+              {t.archived && <span className="indicator archived">[ARCHIVED]</span>}
+              {' '}
+              <Link href={`/${boardSlug}/thread/${t.id}`}>
+                <b>{t.subject || t.posts[0]?.content?.slice(0, 60) || `Thread #${t.id}`}</b>
+              </Link>
+            </div>
             {t.posts.slice(0, 1).map((p) => (
               <div key={p.id}>
                 <div className="head">
@@ -108,18 +137,22 @@ export default function BoardPage({ board, threads, boardSlug, topWidgets, page,
                   <span className="date">{fmt(p.createdAt)}</span>
                   <span className="postnum">→ {p.postNumber}</span>
                 </div>
-                <div className="content">{p.hidden ? '[post removed by moderator]' : p.content}</div>
+                <div className="content">{p.hidden ? '[post removed by moderator]' : p.content.slice(0, 200)}</div>
               </div>
             ))}
-            <div className="actions">
+            <div className="actions thread-meta">
               <Link href={`/${boardSlug}/thread/${t.id}`}>[Reply]</Link>{' '}
-              {t._count.posts > 1 ? `${t._count.posts - 1} replies` : 'No replies'}
+              Replies: {t._count.posts - 1}{' '}
+              | Views: {t.views}{' '}
+              | Last post: {t.lastPost ? t.lastPost.displayName : '—'}{' '}
+              {t.lastPost && <span className="date">{fmt(t.lastPost.createdAt)}</span>}
             </div>
           </div>
         ))}
 
         {totalPages > 1 && (
           <div className="pagination">
+            Pages:{' '}
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               p === page
                 ? <span key={p} className="page-current">[{p}]</span>

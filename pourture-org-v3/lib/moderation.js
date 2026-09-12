@@ -33,17 +33,33 @@ async function isFlooding(uid) {
   return count >= FLOOD_MAX_POSTS;
 }
 
-// Vérifie si l'utilisateur associé à ce cookie est banni.
+// Vérifie si l'utilisateur associé à ce cookie est banni ou suspendu.
 async function isBanned(uid) {
   if (!uid) return false;
   const user = await prisma.user.findUnique({ where: { id: uid } });
-  return !!(user && user.banned);
+  if (!user) return false;
+  if (user.banned) return true;
+  if (user.suspendedUntil && user.suspendedUntil > new Date()) return true;
+  return false;
+}
+
+// Retourne le statut de bannissement/suspension avec raison.
+async function getBanStatus(uid) {
+  if (!uid) return null;
+  const user = await prisma.user.findUnique({ where: { id: uid } });
+  if (!user) return null;
+  if (user.banned) return { type: 'banned', message: 'This identity has been banned from posting.' };
+  if (user.suspendedUntil && user.suspendedUntil > new Date()) {
+    return { type: 'suspended', message: `Suspended until ${user.suspendedUntil.toISOString().slice(0, 10)}.` };
+  }
+  return null;
 }
 
 module.exports = {
   containsBannedContent,
   isFlooding,
   isBanned,
+  getBanStatus,
   FLOOD_WINDOW_MS,
   FLOOD_MAX_POSTS,
 };

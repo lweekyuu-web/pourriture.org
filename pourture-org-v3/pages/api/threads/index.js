@@ -29,6 +29,7 @@ export default async function handler(req, res) {
     data: {
       boardId,
       subject: subject || null,
+      bumpedAt: new Date(),
       posts: {
         create: {
           postNumber: generatePostNumber(),

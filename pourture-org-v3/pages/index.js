@@ -79,7 +79,7 @@ export default function Home({ boards, topWidgets, bottomWidgets, settings, isAd
   return (
     <>
       <div className="topnav">
-        [<Link href="/">Return</Link>] [<Link href="/catalogue">Catalogue</Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]
+        [<Link href="/">Return</Link>] [<Link href="/catalog">Catalog</Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]
       </div>
       <div className="container">
         <div className="site-logo-text">

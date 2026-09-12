@@ -1,35 +1,58 @@
 # Base44 Dev Environment — POURRITURE.ORG
 
-## Project
-Next.js 14 (pages router) + Prisma + PostgreSQL imageboard/forum prototype.
-Source lives in `pourture-org-v3/` (not repo root).
+## What this is
+A fictional old-web community forum (imageboard aesthetic, ~2009-2015 era). Text-only, anonymous identities, moderation tools. Not a real site — all users/content are fictitious.
 
-## Stack & Setup
-- **Runtime**: Node 22 (`node:22` base image), Next.js 14.2.5 dev server
+## Stack
+- **Frontend**: Next.js 14 (pages dir) — React, plain CSS
+- **Backend**: Next.js API routes
 - **Database**: PostgreSQL 16 (`postgres:16-alpine`), user/db `pourriture`, password `pourriture_dev`
 - **ORM**: Prisma 5.18 — schema at `pourture-org-v3/prisma/schema.prisma` (provider: `postgresql`)
-- **Seed**: `pourture-org-v3/prisma/seed.js` — creates 6 boards, demo users, threads, posts
+- **Seed**: `pourture-org-v3/prisma/seed.js` — creates 6 boards, 10 users, 8 badges, 10 threads (incl. sticky/locked/archived), 2 board moderators, 2 reports, 1 warning, 4 moderation actions
 
-## Docker Compose (`docker-compose.base44.yml`)
-Three services:
-1. `db` — PostgreSQL with healthcheck
-2. `setup` — one-shot: `npm install` → `prisma generate` → `prisma db push` → `seed.js`, then exits
-3. `app` — `next dev -H 0.0.0.0` on port 3000, depends on `setup` completing successfully
+## Running
+```bash
+docker compose -f docker-compose.base44.yml up -d
+```
+- App on http://localhost:3000
+- Source lives in `pourture-org-v3/` (not repo root)
+- Source is bind-mounted (`./pourture-org-v3:/app`) so edits hot-reload
+- Setup service runs migrations + seed automatically on first boot
 
-Source is bind-mounted (`./pourture-org-v3:/app`) so edits hot-reload.
+## Reset database
+```bash
+docker compose -f docker-compose.base44.yml down -v
+docker compose -f docker-compose.base44.yml up -d
+```
 
-## Environment Variables
-- `DATABASE_URL` / `DIRECT_URL` — set inline in compose (local PostgreSQL, not a secret)
-- `ADMIN_PASSWORD` — admin login password; generated dev placeholder in `/run/base44/app.env`
-- `SESSION_SECRET` — signs the admin session cookie; generated dev placeholder in `/run/base44/app.env`
-- `env_file` ordering: `.env.base44-defaults` (placeholders) → `/run/base44/app.env` (real values, always wins)
+## Key pages
+- `/` — Homepage with board list
+- `/catalog` — Board catalog (table view)
+- `/{board}` — Board thread listing (sticky first, bump ordering)
+- `/{board}/thread/{id}` — Thread view (OP badge, views, replies)
+- `/search` — Search posts/threads/users
+- `/archive` — Archived threads (read-only)
+- `/user/{anonId}` — User profile
+- `/faq`, `/rules`, `/contact`, `/privacy`, `/status` — Info pages
+- `/admin` — Admin dashboard (password-protected)
+- `/admin/boards` — Board CRUD + rules editing
+- `/admin/badges` — Badge management
+- `/admin/moderators` — Board moderator assignment
+- `/admin/users` — User management (role, ban)
+- `/admin/reports` — Report queue
+- `/mod` — Moderator space (mods + admins)
+- `/mod/reports`, `/mod/posts`, `/mod/threads`, `/mod/users`, `/mod/log`, `/mod/warnings`
 
-## Verification
-- `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/` → 200
-- Homepage shows 6 boards (/a/, /p/, /ph/, /t/, /v/, /x/) with thread counts
-- Admin at `/admin/login` (password = `ADMIN_PASSWORD` env var)
+## Auth model
+- Anonymous identity auto-generated via cookie (`pourriture_uid`)
+- Admin auth via password cookie (`pourriture_admin`)
+- Admin password: `ADMIN_PASSWORD` env var
+- Board moderators: assigned per-board with specific permissions
 
-## Notes
-- Next.js 14 does NOT support `allowedDevOrigins` in next.config.js (causes a warning). The dev server doesn't restrict origins in v14, so the preview works without it.
-- The seed script is NOT idempotent for threads/posts (uses `create`, not `upsert`). Re-running `setup` creates duplicates. To reset: `docker compose -f docker-compose.base44.yml down -v && up -d`.
-- Prisma schema uses both `url` (DATABASE_URL) and `directUrl` (DIRECT_URL) — both must point to the same PostgreSQL instance.
+## Env vars
+- `DATABASE_URL` / `DIRECT_URL` — set in compose
+- `ADMIN_PASSWORD` — admin login password (in .env.base44-defaults or /run/base44/app.env)
+- `SESSION_SECRET` — cookie signing (in .env.base44-defaults or /run/base44/app.env)
+
+## Schema models
+User, Board, Thread (sticky/archived/views/bumpedAt), Post (status), Report (status), Warning, BoardModerator (permissions), Badge, ModerationAction (moderatorId), Widget, SiteSetting
