@@ -126,3 +126,13 @@ pourture-org/
 - **Modération** : les posts peuvent être cachés/supprimés, les threads verrouillés, les utilisateurs bannis, via `/admin`. Les signalements ("Report") sont visibles uniquement par l'admin.
 - **Sécurité** : l'auth admin ici est volontairement minimale (mot de passe unique + cookie de session), adaptée à un prototype local. Ne pas exposer publiquement sans renforcer l'authentification (hash de mot de passe, rate limiting, HTTPS, etc.).
 - **Contenu de démo** : tous les pseudos et messages du seed sont fictifs et inoffensifs (débats de jeux vidéo, petites théories, drama léger) — reproduisant l'ambiance d'un vieux forum sans contenu haineux, violent ou ciblant de vraies personnes.
+
+ ## Vercel + Neon
+
+Set these environment variables in Vercel:
+- `DATABASE_URL`: the Neon pooled connection string for application runtime.
+- `DIRECT_URL`: the Neon direct (non-pooled) connection string. It must not use the `-pooler` hostname.
+- `ADMIN_PASSWORD`: a strong admin password.
+- `SESSION_SECRET`: a long random secret.
+
+The build runs `prisma generate`, `prisma db push`, then `next build`.
