@@ -17,6 +17,16 @@
       "static/chunks/main.js",
       "static/chunks/pages/index.js"
     ],
+    "/[board]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/[board].js"
+    ],
+    "/[board]/thread/[id]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/[board]/thread/[id].js"
+    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
