@@ -1,0 +1,43 @@
+.panel {
+  border: 1px solid #b7c5d9;
+  background: #f9f9ff;
+  padding: 8px;
+  margin: 10px 0;
+}
+
+.panel h1 {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  color: #af0a0f;
+  margin: 0 0 8px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.table th,
+.table td {
+  border: 1px solid #b7c5d9;
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: #d6daf0;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .table {
+    font-size: 10px;
+  }
+
+  .table th,
+  .table td {
+    padding: 3px;
+  }
+}
