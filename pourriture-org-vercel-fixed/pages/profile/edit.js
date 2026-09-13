@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function EditProfile() {
-  const [form, setForm] = useState({ displayName: '', bio: '', signature: '', avatarUrl: '', bannerUrl: '', profileTheme: 'classic', profileLayout: 'compact', profileGifUrl: '' });
+  const [form, setForm] = useState({ displayName: '', bio: '', signature: '', avatarUrl: '', bannerUrl: '', profileTheme: 'classic', profileLayout: 'compact', profileNameColor: '#117743', profileNameStyle: 'normal', profileGifUrl: '' });
   const [mediaState, setMediaState] = useState({ avatarStatus: 'approved', bannerStatus: 'approved' });
   const [state, setState] = useState('loading');
   const [notice, setNotice] = useState('');
@@ -48,11 +48,13 @@ export default function EditProfile() {
       <form onSubmit={save}>
         <table className="admin profile-form"><tbody>
           <tr><th>Display name</th><td><input name="displayName" value={form.displayName} onChange={change} maxLength={32} /></td></tr>
+          <tr><th>Name color</th><td><select name="profileNameColor" value={form.profileNameColor} onChange={change}><option value="#117743">Green</option><option value="#0000ee">Blue</option><option value="#af0a0f">Red</option><option value="#7a3e9d">Purple</option><option value="#555555">Gray</option><option value="#8a5a00">Brown</option><option value="#008080">Teal</option></select></td></tr>
+          <tr><th>Name style</th><td><select name="profileNameStyle" value={form.profileNameStyle} onChange={change}><option value="normal">Normal</option><option value="bold">Bold</option><option value="italic">Italic</option><option value="bold-italic">Bold + italic</option></select></td></tr>
           <tr><th>Bio</th><td><textarea name="bio" value={form.bio} onChange={change} maxLength={500} rows={5} /></td></tr>
           <tr><th>Signature</th><td><textarea name="signature" value={form.signature} onChange={change} maxLength={160} rows={3} /></td></tr>
           <tr><th>Avatar image</th><td><input name="avatarUrl" value={form.avatarUrl} onChange={change} maxLength={500} placeholder="https://..." /><div className="muted">HTTPS image URL. New images are hidden from public profiles until the moderation gate clears them.</div>{form.avatarUrl && <img className="profile-editor-preview" src={form.avatarUrl} alt="Avatar preview" />}{mediaState.avatarStatus === 'review' && <div className="review-note">[PENDING MODERATION] Other users cannot see this image yet.</div>}</td></tr>
           <tr><th>Banner image</th><td><input name="bannerUrl" value={form.bannerUrl} onChange={change} maxLength={500} placeholder="https://..." /><div className="muted">HTTPS image URL. New images are checked before public display.</div>{form.bannerUrl && <img className="profile-editor-banner-preview" src={form.bannerUrl} alt="Banner preview" />}{mediaState.bannerStatus === 'review' && <div className="review-note">[PENDING MODERATION] Other users cannot see this image yet.</div>}</td></tr>
-          <tr><th>Profile GIF</th><td><input name="profileGifUrl" value={form.profileGifUrl} onChange={change} maxLength={500} placeholder="GIPHY URL" /><div className="muted">GIPHY only. Post GIFs still use the site moderation queue.</div></td></tr>
+          <tr><th>Profile GIF</th><td><input name="profileGifUrl" value={form.profileGifUrl} onChange={change} maxLength={500} placeholder="GIPHY URL" /><div className="muted">GIPHY only. Post GIFs still use the site moderation queue.</div>{form.profileGifUrl && <img className="profile-editor-gif-preview" src={form.profileGifUrl} alt="Profile GIF preview" />}</td></tr>
           <tr><th>Theme</th><td><select name="profileTheme" value={form.profileTheme} onChange={change}><option value="classic">Classic board</option><option value="blue">Blue board</option><option value="green">Old green</option><option value="gray">Gray terminal</option><option value="red">Red warning</option><option value="purple">Purple net</option></select></td></tr>
           <tr><th>Layout</th><td><select name="profileLayout" value={form.profileLayout} onChange={change}><option value="compact">Compact</option><option value="profile">Profile first</option><option value="imageboard">Imageboard</option></select></td></tr>
         </tbody></table>
