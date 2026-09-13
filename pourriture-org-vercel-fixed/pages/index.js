@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import prisma from '../lib/prisma';
 import { getWidgetsForSlot } from '../lib/widgets';
 import { getAllSettings } from '../lib/settings';
@@ -19,16 +19,37 @@ function ageLabel(dateStr) { const y = new Date(dateStr).getUTCFullYear(); retur
 
 export default function Home({ boards, topWidgets, bottomWidgets, settings, isAdmin, totalThreads, totalUsers }) {
   const [editingMotd, setEditingMotd] = useState(false), [motdValue, setMotdValue] = useState(settings.motd || ''), [saved, setSaved] = useState(false), [jumpBoard, setJumpBoard] = useState('');
+  const [clock, setClock] = useState('');
+  const [randomBoard, setRandomBoard] = useState(null);
+
+  useEffect(() => {
+    const tick = () => setClock(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   function handleUpdateClick(e) { if (!isAdmin) return; e.preventDefault(); setEditingMotd(!editingMotd); }
   function jump(e) { e.preventDefault(); if (jumpBoard) window.location.href = `/${jumpBoard.replace(/\//g, '')}`; }
+  function pickRandomBoard() { if (boards.length) setRandomBoard(boards[Math.floor(Math.random() * boards.length)]); }
   async function saveMotd() { const res = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ motd: motdValue }) }); if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 1500); setEditingMotd(false); window.location.reload(); } }
+
   return <main className="container">
     <div className="site-logo-text"><div className="wordmark">{settings.site_title}</div><div className="est-line">est. 2009 — a place on the internet</div></div>
     <div className="subtitle">{settings.site_tagline}</div>
+    <div className={styles.webdesk}>
+      <span><i className={styles.statusLight}></i> SITE ONLINE</span>
+      <span>LOCAL TIME: <b>{clock || '--:--:--'}</b></span>
+      <span>ARCHIVE: 2009 → 2017</span>
+    </div>
     {isAdmin && editingMotd && <div className="motd-editor"><div><b>Admin: edit the site notice.</b></div><textarea rows={3} value={motdValue} onChange={e => setMotdValue(e.target.value)} placeholder="Announcement or notice..."/><div><button type="button" onClick={saveMotd}>Update</button>{' '}<button type="button" onClick={() => setEditingMotd(false)}>Cancel</button>{saved && <span style={{ marginLeft: 8, color: 'green' }}>Saved.</span>}</div></div>}
     {!editingMotd && settings.motd && settings.motd.trim() && <div className="motd">{settings.motd}{isAdmin && <span className="motd-edit-hint"> [<a href="#" onClick={handleUpdateClick}>edit</a>]</span>}</div>}
     <div className="home-note">This index is an old corner of the web. Boards keep their own history, names and rules; nothing here is meant to look freshly manufactured.</div>
     <div className={styles.tools}><div className={styles.stats}><b>{boards.length}</b> boards · <b>{totalThreads}</b> threads · <b>{totalUsers}</b> users</div><form className={styles.jump} onSubmit={jump}><label htmlFor="jumpBoard">Jump to:</label><select id="jumpBoard" value={jumpBoard} onChange={e => setJumpBoard(e.target.value)}><option value="">select a board</option>{boards.map(b => <option key={b.id} value={b.id.replace(/\//g, '')}>{b.id} — {b.name}</option>)}</select><button type="submit" disabled={!jumpBoard}>Go</button></form></div>
+    <div className={styles.utilityRow}>
+      <div className={styles.utilityBox}><b>RANDOM BOARD</b><span>{randomBoard ? <Link href={`/${randomBoard.id.replace(/\//g, '')}`}>/{randomBoard.id.replace(/\//g, '')}/ — {randomBoard.name}</Link> : 'No selection yet.'}</span><button type="button" onClick={pickRandomBoard}>Shuffle</button></div>
+      <div className={styles.utilityBox}><b>WEB DESK</b><span><Link href="/archive">Archive</Link> · <Link href="/status">Statistics</Link> · <Link href="/rules">Rules</Link> · <Link href="/faq">FAQ</Link></span><small>Keep the old links alive.</small></div>
+    </div>
     <WidgetSlot widgets={topWidgets}/>
     <div className={styles.heading}><b>PUBLIC BOARDS</b><span>last activity in UTC</span></div>
     {boards.map(b => <div className={`${styles.board} ${b.featured ? styles.featured : ''}`} key={b.id}><div><span className={styles.bid}>[{b.id.replace(/\//g, '')}]</span> <Link className={styles.boardLink} href={`/${b.id.replace(/\//g, '')}`}>{b.name}</Link>{b.featured && <span className="badge"> [FEATURED]</span>}<span className={styles.boardAge}>{ageLabel(b.createdAt)}</span></div><div className={styles.desc}>{b.description}</div><div className={styles.meta}><b>{b.threadCount}</b> threads — Last activity: {fmt(b.lastActivity)}</div></div>)}
