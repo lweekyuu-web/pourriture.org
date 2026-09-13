@@ -4,7 +4,7 @@ import prisma from '../lib/prisma';
 export async function getServerSideProps() {
   const threads = await prisma.thread.findMany({
     where: { archived: true },
-    include: { board: true, posts: { orderBy: { createdAt: 'asc' }, take: 1 }, lastPost: false, _count: { select: { posts: true } } },
+    include: { board: true, posts: { orderBy: { createdAt: 'asc' }, take: 1 }, _count: { select: { posts: true } } },
     orderBy: { bumpedAt: 'desc' },
     take: 100,
   });
