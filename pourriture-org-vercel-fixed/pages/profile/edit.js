@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import GifPicker from '../../components/GifPicker';
 import styles from '../../styles/profileEditor.module.css';
 
 const nameColors = [
@@ -78,7 +79,7 @@ export default function EditProfile() {
                   <div className={styles.mediaBox}><b>Avatar</b><input className={styles.input} name="avatarUrl" value={form.avatarUrl} onChange={change} maxLength={500} placeholder="https://..." />{form.avatarUrl && <img className={styles.avatarPreview} src={form.avatarUrl} alt="Avatar preview" />}{mediaState.avatarStatus === 'review' && <div className={styles.help}>Pending moderation.</div>}</div>
                   <div className={styles.mediaBox}><b>Banner</b><input className={styles.input} name="bannerUrl" value={form.bannerUrl} onChange={change} maxLength={500} placeholder="https://..." />{form.bannerUrl && <img className={styles.bannerPreview} src={form.bannerUrl} alt="Banner preview" />}{mediaState.bannerStatus === 'review' && <div className={styles.help}>Pending moderation.</div>}</div>
                 </div>
-                <div className={styles.row}><div className={styles.label}>Profile GIF</div><div><input className={styles.input} name="profileGifUrl" value={form.profileGifUrl} onChange={change} maxLength={500} placeholder="GIPHY URL" />{form.profileGifUrl && <img className={styles.previewImage} src={form.profileGifUrl} alt="Profile GIF preview" />}<div className={styles.help}>GIPHY only.</div></div></div>
+                <div className={styles.row}><div className={styles.label}>Profile GIF</div><div><GifPicker value={form.profileGifUrl} onChange={(value) => setForm({ ...form, profileGifUrl: value })} /><div className={styles.help}>Choose from the configured GIF provider.</div></div></div>
               </div>
             </section>
 
