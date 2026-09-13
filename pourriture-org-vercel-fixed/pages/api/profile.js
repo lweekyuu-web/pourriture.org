@@ -3,6 +3,8 @@ import { getUidFromReq } from '../../lib/identity';
 
 const THEMES = new Set(['classic', 'blue', 'green', 'gray', 'red', 'purple']);
 const LAYOUTS = new Set(['compact', 'profile', 'imageboard']);
+const NAME_STYLES = new Set(['normal', 'bold', 'italic', 'bold-italic']);
+const NAME_COLORS = new Set(['#117743', '#0000ee', '#af0a0f', '#7a3e9d', '#555555', '#8a5a00', '#008080']);
 const MAX = { displayName: 32, bio: 500, signature: 160, url: 500 };
 
 function cleanText(value, max) {
@@ -70,6 +72,8 @@ export default async function handler(req, res) {
       bannerStatus: user.bannerStatus,
       profileTheme: user.profileTheme,
       profileLayout: user.profileLayout,
+      profileNameColor: user.profileNameColor,
+      profileNameStyle: user.profileNameStyle,
       profileGifUrl: user.profileGifUrl || '',
       badge: user.badge,
       status: user.status,
@@ -86,6 +90,8 @@ export default async function handler(req, res) {
   const profileGifUrl = cleanText(body.profileGifUrl, MAX.url);
   const profileTheme = THEMES.has(body.profileTheme) ? body.profileTheme : 'classic';
   const profileLayout = LAYOUTS.has(body.profileLayout) ? body.profileLayout : 'compact';
+  const profileNameColor = NAME_COLORS.has(body.profileNameColor) ? body.profileNameColor : '#117743';
+  const profileNameStyle = NAME_STYLES.has(body.profileNameStyle) ? body.profileNameStyle : 'normal';
 
   if (!validImageUrl(avatarUrl) || !validImageUrl(bannerUrl)) return res.status(400).json({ error: 'Avatar and banner URLs must use HTTPS.' });
   if (!validGifUrl(profileGifUrl)) return res.status(400).json({ error: 'Profile GIFs must come from GIPHY over HTTPS.' });
@@ -109,6 +115,8 @@ export default async function handler(req, res) {
       bannerAiFlagged: bannerUrl ? !!bannerReview.flagged : false,
       profileTheme,
       profileLayout,
+      profileNameColor,
+      profileNameStyle,
       profileGifUrl: profileGifUrl || null,
     },
   });
