@@ -24,6 +24,8 @@ export async function getServerSideProps({ params }) {
     bannerUrl: user.bannerStatus === 'approved' ? (user.bannerUrl || '') : '',
     profileTheme: user.profileTheme,
     profileLayout: user.profileLayout,
+    profileNameColor: user.profileNameColor,
+    profileNameStyle: user.profileNameStyle,
     profileGifUrl: user.profileGifUrl || '',
     avatarStatus: user.avatarStatus,
     bannerStatus: user.bannerStatus,
@@ -36,6 +38,15 @@ function fmt(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'utc' });
 }
 
+function nameStyle(user) {
+  const style = user.profileNameStyle || 'normal';
+  return {
+    color: user.profileNameColor || '#117743',
+    fontWeight: style === 'bold' || style === 'bold-italic' ? 'bold' : 'normal',
+    fontStyle: style === 'italic' || style === 'bold-italic' ? 'italic' : 'normal',
+  };
+}
+
 export default function Profile({ user }) {
   const themeClass = `profile-theme-${user.profileTheme || 'classic'}`;
   return (
@@ -45,7 +56,7 @@ export default function Profile({ user }) {
       <section className={`profile-header ${user.profileLayout === 'profile' ? 'profile-layout-first' : ''} ${user.profileLayout === 'imageboard' ? 'profile-layout-imageboard' : ''}`}>
         {user.avatarUrl ? <img className="profile-avatar" src={user.avatarUrl} alt="" /> : <div className="profile-avatar avatar-placeholder">?</div>}
         <div className="profile-title">
-          <h1 className="sitetitle">{user.displayName}</h1>
+          <h1 className="sitetitle" style={{ color: user.profileNameColor || '#af0a0f', fontWeight: user.profileNameStyle === 'bold' || user.profileNameStyle === 'bold-italic' ? 'bold' : 'normal', fontStyle: user.profileNameStyle === 'italic' || user.profileNameStyle === 'bold-italic' ? 'italic' : 'normal' }}>{user.displayName}</h1>
           <div><span className="badge badge-sparkle">[{user.badge}]</span> <span className="user-status">[{user.status}]</span></div>
           <div className="profile-id">Anonymous #{user.anonId}</div>
         </div>
