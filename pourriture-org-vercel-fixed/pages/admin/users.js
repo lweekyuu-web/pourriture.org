@@ -3,6 +3,13 @@ import Link from 'next/link';
 import { isAdminRequest } from '../../lib/admin';
 import prisma from '../../lib/prisma';
 
+const ADMIN_PERMISSIONS = [
+  ['DASHBOARD', 'Dashboard'], ['USERS', 'Users'], ['BADGES', 'Badges'], ['BOARDS', 'Boards'],
+  ['BOARD_REQUESTS', 'Board requests'], ['MODERATION', 'Moderation'], ['REPORTS', 'Reports'],
+  ['PROFILE_MEDIA', 'Profile media'], ['SECURITY', 'Security'], ['WIDGETS', 'Widgets'],
+  ['SETTINGS', 'Settings'], ['STATISTICS', 'Statistics'],
+];
+
 export async function getServerSideProps({ req }) {
   if (!isAdminRequest(req)) return { redirect: { destination: '/admin/login', permanent: false } };
   const [users, badges] = await Promise.all([
@@ -12,85 +19,76 @@ export async function getServerSideProps({ req }) {
   return { props: { users: JSON.parse(JSON.stringify(users)), badges: JSON.parse(JSON.stringify(badges)) } };
 }
 
-function fmt(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' });
-}
-
-function userLabel(u) {
-  return u.displayName && u.displayName !== 'Anonymous' ? u.displayName : `User #${u.anonId}`;
-}
+function fmt(dateStr) { const d = new Date(dateStr); return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' }); }
+function userLabel(u) { return u.displayName && u.displayName !== 'Anonymous' ? u.displayName : `User #${u.anonId}`; }
 
 export default function AdminUsers({ users: initialUsers, badges: initialBadges }) {
   const [users, setUsers] = useState(initialUsers);
   const [badges] = useState(initialBadges);
   const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState('');
+  const selected = users.find((u) => u.id === selectedId) || null;
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
-    return users.filter((u) => [u.displayName, u.anonId, u.role, u.status, u.badge]
-      .filter(Boolean)
-      .some((value) => String(value).toLowerCase().includes(q)));
+    return users.filter((u) => [u.displayName, u.anonId, u.role, u.status, u.badge, u.adminTitle]
+      .filter(Boolean).some((value) => String(value).toLowerCase().includes(q)));
   }, [users, search]);
 
-  async function toggleBan(user) {
-    const action = user.banned ? 'unban' : 'ban';
-    const res = await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, action }) });
-    if (res.ok) setUsers((list) => list.map((u) => u.id === user.id ? { ...u, banned: !u.banned, badge: !u.banned ? 'Banned' : 'Newbie', status: !u.banned ? 'Banned' : 'Regular' } : u));
+  async function post(action, body = {}) {
+    const res = await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ...body }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { alert(data.error || 'Update failed.'); return null; }
+    if (data.user) setUsers((list) => list.map((u) => u.id === data.user.id ? { ...u, ...data.user } : u));
+    return data;
   }
 
-  async function setRole(user, role) {
-    const res = await fetch('/api/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, action: 'set_role', role }) });
-    if (res.ok) setUsers((list) => list.map((u) => u.id === user.id ? { ...u, role } : u));
-  }
+  async function setRole(user, role) { await post('set_role', { userId: user.id, role }); }
+  async function assignBadge(user, badgeId) { await post('assign_badge', { userId: user.id, badgeId: badgeId || null }); }
 
-  async function assignBadge(user, badgeId) {
-    const res = await fetch('/api/mod/badge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, badgeId: badgeId || null }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return alert(err.error || 'Badge update failed.');
-    }
-    const data = await res.json();
-    setUsers((list) => list.map((u) => u.id === user.id ? { ...u, badge: data.user.badge } : u));
+  async function saveAdminAccess() {
+    if (!selected || selected.role !== 'administrator') return;
+    const checks = Array.from(document.querySelectorAll('input[data-admin-permission]:checked')).map((el) => el.value);
+    const title = document.getElementById('admin-title')?.value || '';
+    await post('set_admin_access', { userId: selected.id, adminTitle: title, adminPermissions: checks });
   }
 
   return (
     <div className="container">
-      <h1 className="sitetitle">USER MANAGEMENT</h1>
-      <p>[<Link href="/admin">Back to dashboard</Link>]</p>
+      <h1 className="sitetitle">USER & STAFF MANAGEMENT</h1>
+      <p>[<Link href="/admin">Back to dashboard</Link>] [<Link href="/admin/badges">Badge definitions</Link>] [<Link href="/admin/moderators">Board moderators</Link>]</p>
 
       <div className="post user-search-box">
-        <b>Find a user</b><br />
-        <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Display name, anonymous ID, role..." aria-label="Search users" style={{ width: 'min(420px, 100%)' }} />{' '}
+        <b>Find a user / badge holder</b><br />
+        <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Display name, anonymous ID, role, badge..." aria-label="Search users" style={{ width: 'min(520px, 100%)' }} />{' '}
         {search && <button type="button" onClick={() => setSearch('')}>[Clear]</button>}
-        <div className="muted">Showing {filteredUsers.length} of {users.length} users.</div>
+        <div className="muted">Showing {filteredUsers.length} of {users.length} users. Select a person below to manage their staff access.</div>
       </div>
 
-      <table className="admin"><thead><tr>
-        <th>User</th><th>Anonymous ID</th><th>Display Name</th><th>Badge</th><th>Role</th><th>Status</th><th>Posts</th><th>Joined</th><th>Actions</th>
-      </tr></thead><tbody>
+      <table className="admin"><thead><tr><th>User</th><th>ID</th><th>Badge</th><th>Role</th><th>Status</th><th>Posts</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
         {filteredUsers.map((u) => <tr key={u.id}>
-          <td><Link href={`/user/${u.anonId}`}>{userLabel(u)}</Link></td>
-          <td>#{u.anonId}</td>
-          <td>{u.displayName && u.displayName !== 'Anonymous' ? u.displayName : <span className="muted">(no display name)</span>}</td>
-          <td>
-            <div><b>{u.badge}</b></div>
-            <select value={badges.some((b) => b.name === u.badge) ? String(badges.find((b) => b.name === u.badge).id) : ''} onChange={(e) => assignBadge(u, e.target.value)} style={{ fontSize: 11, maxWidth: 150 }} aria-label={`Assign badge to ${userLabel(u)}`}>
-              <option value="">Newbie / none</option>
-              {badges.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-          </td>
+          <td><Link href={`/user/${u.anonId}`}>{userLabel(u)}</Link></td><td>#{u.anonId}</td>
+          <td><b>{u.badge}</b><br /><select value={badges.some((b) => b.name === u.badge) ? String(badges.find((b) => b.name === u.badge).id) : ''} onChange={(e) => assignBadge(u, e.target.value)} style={{ fontSize: 11, maxWidth: 160 }}><option value="">Newbie / none</option>{badges.map((b) => <option key={b.id} value={b.id}>{b.name} (L{b.level})</option>)}</select></td>
           <td><select value={u.role} onChange={(e) => setRole(u, e.target.value)} style={{ fontSize: 11 }}><option value="user">user</option><option value="moderator">moderator</option><option value="administrator">administrator</option></select></td>
-          <td>{u.status}</td><td>{u.postCount}</td><td>{fmt(u.createdAt)}</td>
-          <td><a href="#" onClick={(e) => { e.preventDefault(); toggleBan(u); }}>[{u.banned ? 'Unban' : 'Ban'}]</a></td>
+          <td>{u.status}{u.adminTitle && <><br /><span className="muted">{u.adminTitle}</span></>}</td><td>{u.postCount}</td><td>{fmt(u.createdAt)}</td>
+          <td><button type="button" onClick={() => setSelectedId(u.id)}>[Manage]</button></td>
         </tr>)}
       </tbody></table>
       {filteredUsers.length === 0 && <p>No matching users.</p>}
+
+      {selected && <div className="post" style={{ marginTop: 12 }}>
+        <b>STAFF / BADGE PROFILE: {userLabel(selected)}</b> — #{selected.anonId}<br />
+        <div style={{ marginTop: 6 }}>Current badge: <b>{selected.badge}</b> · Role: <b>{selected.role}</b></div>
+        <p className="muted">Badges are cosmetic labels. Roles and permissions are what grant staff access. Do not share the master admin password.</p>
+        <label>Admin title / function<br /><input id="admin-title" type="text" defaultValue={selected.adminTitle || ''} placeholder="e.g. Glitter Admin, Community Admin" maxLength={40} style={{ width: 'min(420px, 100%)' }} /></label>
+        {selected.role === 'administrator' ? <>
+          <div style={{ marginTop: 8 }}><b>Admin interfaces / tasks</b></div>
+          <div className="perm-list">{ADMIN_PERMISSIONS.map(([value, label]) => <label key={value}><input data-admin-permission value={value} type="checkbox" defaultChecked={(selected.adminPermissions || []).includes(value)} /> {label}</label>)}</div>
+          <button type="button" onClick={saveAdminAccess}>[Save admin access]</button>
+        </> : <p className="muted">Set the Role to <b>administrator</b> above to configure delegated admin interfaces and tasks.</p>}
+        <button type="button" onClick={() => setSelectedId('')} style={{ marginLeft: 8 }}>[Close]</button>
+      </div>}
     </div>
   );
 }
