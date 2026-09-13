@@ -37,7 +37,15 @@ export default async function handler(req, res) {
       const statusMap = { user: 'Regular', moderator: 'Moderator', administrator: 'Administrator' };
       const staffBadgeMap = { user: 'Newbie', moderator: 'Moderator', administrator: 'Administrator' };
       const shouldReplaceStaffBadge = ['Newbie', 'Moderator', 'Administrator', 'Banned'].includes(target.badge);
-      const updated = await prisma.user.update({ where: { id: userId }, data: { role, status: statusMap[role], ...(shouldReplaceStaffBadge ? { badge: staffBadgeMap[role] } : {}) } });
+      const updated = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          role,
+          status: statusMap[role],
+          ...(shouldReplaceStaffBadge ? { badge: staffBadgeMap[role] } : {}),
+          ...(role !== 'administrator' ? { adminTitle: null, adminPermissions: [] } : {}),
+        },
+      });
       await prisma.moderationAction.create({ data: { action: 'set_role', targetType: 'user', targetId: userId, reason: `role: ${role}` } });
       return res.status(200).json({ ok: true, user: await userWithBadges(updated.id) });
     } else if (action === 'set_admin_access') {
@@ -53,11 +61,7 @@ export default async function handler(req, res) {
       if (!Number.isInteger(badgeId)) return res.status(400).json({ error: 'Badge not found' });
       const badge = await prisma.badge.findUnique({ where: { id: badgeId } });
       if (!badge) return res.status(404).json({ error: 'Badge not found' });
-      if (target.role === 'administrator' && action !== 'add_badge' && badge.name === 'Administrator') return res.status(403).json({ error: 'Administrator badge is protected.' });
-      if (target.role === 'administrator' && badge.name === 'Administrator') {
-        const existing = await prisma.userBadge.findUnique({ where: { userId_badgeId: { userId: target.id, badgeId } } });
-        if (action === 'remove_badge' && !existing) return res.status(404).json({ error: 'Badge is not assigned.' });
-      }
+      if (target.role === 'administrator' && action === 'remove_badge' && badge.name === 'Administrator') return res.status(403).json({ error: 'Administrator badge is protected.' });
       if (action === 'add_badge') await prisma.userBadge.upsert({ where: { userId_badgeId: { userId: target.id, badgeId } }, update: {}, create: { userId: target.id, badgeId } });
       else await prisma.userBadge.deleteMany({ where: { userId: target.id, badgeId } });
       await prisma.moderationAction.create({ data: { action: action === 'add_badge' ? 'assign_badge' : 'remove_badge', targetType: 'user', targetId: target.id, reason: `badge: ${badge.name}` } });
