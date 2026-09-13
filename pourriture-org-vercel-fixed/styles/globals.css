@@ -93,6 +93,24 @@ table.admin th { background: #d6daf0; }
 .search-form input[type=text] { width: 200px; }
 .search-result { font-size: 12px; }
 .profile-box { margin: 10px 0; }
+.profile-banner { border: 1px solid #b7c5d9; background: #d6daf0; margin: 8px 0 0; max-height: 180px; overflow: hidden; }
+.profile-banner img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
+.profile-header { display: flex; gap: 10px; align-items: center; border: 1px solid #b7c5d9; background: #f9f9ff; padding: 8px; margin-bottom: 8px; }
+.profile-header.profile-layout-first { align-items: flex-start; }
+.profile-avatar { width: 96px; height: 96px; object-fit: cover; border: 1px solid #888; background: #e4e4e4; flex: 0 0 auto; }
+.avatar-placeholder { display: flex; align-items: center; justify-content: center; color: #777; font-size: 28px; font-weight: bold; }
+.profile-title { min-width: 0; }
+.profile-title .sitetitle { text-align: left; margin: 0 0 4px; }
+.profile-id { color: #777; font-size: 11px; margin-top: 4px; }
+.profile-bio { border: 1px solid #b7c5d9; background: #fff; padding: 6px 8px; margin: 8px 0; white-space: pre-wrap; }
+.profile-signature { border-top: 1px dotted #aaa; color: #777; font-size: 10px; margin-top: 6px; padding-top: 4px; white-space: pre-wrap; }
+.profile-gif { margin: 8px 0; }
+.profile-gif img { max-width: 360px; max-height: 240px; border: 1px solid #888; }
+.profile-editor input[type=text], .profile-editor textarea, .profile-editor select { max-width: 600px; width: 100%; }
+.profile-editor td { vertical-align: top; }
+.profile-theme-blue .profile-header, .profile-theme-blue .profile-bio { background: #edf4ff; }
+.profile-theme-green .profile-header, .profile-theme-green .profile-bio { background: #eff9ef; }
+.profile-theme-gray .profile-header, .profile-theme-gray .profile-bio { background: #eeeeee; }
 .rules-section, .faq-section { margin: 10px 0; }
 .rules-section h3, .faq-section h3 { font-size: 14px; color: #333; margin: 14px 0 6px 0; font-family: Tahoma, sans-serif; }
 .rules-text { font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; margin: 4px 0; }
@@ -122,4 +140,7 @@ table.admin th { background: #d6daf0; }
   .thread-meta { font-size: 10px; }
   .gif-grid { grid-template-columns: repeat(3, 1fr); }
   .gif-picker { width: calc(100vw - 20px); }
+  .profile-header { align-items: flex-start; }
+  .profile-avatar { width: 72px; height: 72px; }
+  .profile-title .sitetitle { font-size: 17px; }
 }
