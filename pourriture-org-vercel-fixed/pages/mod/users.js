@@ -5,12 +5,15 @@ import { isModeratorReq } from '../../lib/permissions';
 
 export async function getServerSideProps({ req }) {
   if (!(await isModeratorReq(req))) return { redirect: { destination: '/admin/login', permanent: false } };
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: 'desc' },
-    take: 1000,
-    include: { warnings: { orderBy: { createdAt: 'desc' }, take: 3 } },
-  });
-  return { props: { users: JSON.parse(JSON.stringify(users)) } };
+  const [users, badges] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
+      include: { warnings: { orderBy: { createdAt: 'desc' }, take: 3 } },
+    }),
+    prisma.badge.findMany({ orderBy: [{ level: 'asc' }, { name: 'asc' }] }),
+  ]);
+  return { props: { users: JSON.parse(JSON.stringify(users)), badges: JSON.parse(JSON.stringify(badges)) } };
 }
 
 function fmt(dateStr) {
@@ -22,8 +25,9 @@ function userLabel(u) {
   return u.displayName && u.displayName !== 'Anonymous' ? u.displayName : `User #${u.anonId}`;
 }
 
-export default function ModUsers({ users: initialUsers }) {
+export default function ModUsers({ users: initialUsers, badges: initialBadges }) {
   const [users, setUsers] = useState(initialUsers);
+  const [badges] = useState(initialBadges);
   const [search, setSearch] = useState('');
   const [warnUser, setWarnUser] = useState(null);
   const [warnReason, setWarnReason] = useState('');
@@ -52,6 +56,20 @@ export default function ModUsers({ users: initialUsers }) {
       if (action === 'restore_user') return { ...u, status: 'Regular' };
       return { ...u, displayName: 'Deleted user', banned: true, status: 'Deleted', recoveryKeyHash: null };
     }));
+  }
+
+  async function assignBadge(user, badgeId) {
+    const res = await fetch('/api/mod/badge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.id, badgeId: badgeId || null }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return alert(err.error || 'Badge update failed.');
+    }
+    const data = await res.json();
+    setUsers((list) => list.map((u) => u.id === user.id ? { ...u, badge: data.user.badge } : u));
   }
 
   async function issueWarning(e) {
@@ -101,7 +119,14 @@ export default function ModUsers({ users: initialUsers }) {
           <td><Link href={`/user/${u.anonId}`}>{userLabel(u)}</Link></td>
           <td>#{u.anonId}</td>
           <td>{u.displayName && u.displayName !== 'Anonymous' ? u.displayName : <span className="muted">(no display name)</span>}</td>
-          <td>{u.badge}</td><td>{u.role}</td><td>{u.status}</td><td>{u.postCount}</td><td>{fmt(u.createdAt)}</td><td>{u.warnings.length}</td>
+          <td>
+            <div><b>{u.badge}</b></div>
+            <select value={badges.some((b) => b.name === u.badge) ? String(badges.find((b) => b.name === u.badge).id) : ''} onChange={(e) => assignBadge(u, e.target.value)} style={{ fontSize: 11, maxWidth: 150 }} aria-label={`Assign badge to ${userLabel(u)}`}>
+              <option value="">Newbie / none</option>
+              {badges.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </td>
+          <td>{u.role}</td><td>{u.status}</td><td>{u.postCount}</td><td>{fmt(u.createdAt)}</td><td>{u.warnings.length}</td>
           <td>
             <a href="#" onClick={(e) => { e.preventDefault(); setWarnUser(u); }}>[Warn]</a>{' '}
             <a href="#" onClick={(e) => { e.preventDefault(); action(u, u.banned ? 'unban_user' : 'ban_user'); }}>[{u.banned ? 'Unban' : 'Ban'}]</a>{' '}
