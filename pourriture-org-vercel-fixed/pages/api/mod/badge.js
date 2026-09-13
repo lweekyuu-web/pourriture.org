@@ -1,5 +1,5 @@
 import prisma from '../../../lib/prisma';
-import { isModeratorReq } from '../../../lib/permissions';
+import { isAdminReq, isModeratorReq } from '../../../lib/permissions';
 
 export default async function handler(req, res) {
   if (!(await isModeratorReq(req))) return res.status(403).json({ error: 'forbidden' });
@@ -16,12 +16,14 @@ export default async function handler(req, res) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Empty badgeId removes the custom badge and restores the normal Newbie label.
+    // Administrator badges are owner/admin-only. Board/global moderators cannot change them.
+    if (user.role === 'administrator' && !isAdminReq(req)) {
+      return res.status(403).json({ error: 'Only the site administrator can manage an administrator badge.' });
+    }
+
     if (badgeId === null || badgeId === '' || typeof badgeId === 'undefined') {
       const updated = await prisma.user.update({ where: { id: userId }, data: { badge: 'Newbie' } });
-      await prisma.moderationAction.create({
-        data: { action: 'remove_badge', targetType: 'user', targetId: userId },
-      });
+      await prisma.moderationAction.create({ data: { action: 'remove_badge', targetType: 'user', targetId: userId } });
       return res.status(200).json({ user: updated });
     }
 
@@ -30,14 +32,8 @@ export default async function handler(req, res) {
 
     const updated = await prisma.user.update({ where: { id: userId }, data: { badge: badge.name } });
     await prisma.moderationAction.create({
-      data: {
-        action: 'assign_badge',
-        targetType: 'user',
-        targetId: userId,
-        reason: `badge: ${badge.name}`,
-      },
+      data: { action: 'assign_badge', targetType: 'user', targetId: userId, reason: `badge: ${badge.name}` },
     });
-
     return res.status(200).json({ user: updated, badge });
   }
 
