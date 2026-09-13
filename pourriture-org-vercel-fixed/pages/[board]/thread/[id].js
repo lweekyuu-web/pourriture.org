@@ -33,12 +33,10 @@ export async function getServerSideProps({ params, req }) {
   if (!thread) return { notFound: true };
 
   await prisma.thread.update({ where: { id: threadId }, data: { views: { increment: 1 } } });
-
   const [topWidgets, bottomWidgets] = await Promise.all([
     getWidgetsForSlot('thread_top'),
     getWidgetsForSlot('thread_bottom'),
   ]);
-
   const isMod = await isModeratorReq(req);
 
   return {
@@ -74,7 +72,6 @@ const gifStyle = { maxWidth: 'min(480px, 100%)', maxHeight: 360, display: 'block
 
 export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidgets, isMod }) {
   const [replyTo, setReplyTo] = useState(null);
-  const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [gifUrl, setGifUrl] = useState('');
   const [posts, setPosts] = useState(thread.posts);
@@ -85,17 +82,17 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
     const res = await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ threadId: thread.id, name, message, gifUrl, replyToId: replyTo }),
+      body: JSON.stringify({ threadId: thread.id, message, gifUrl, replyToId: replyTo }),
     });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) {
-      const data = await res.json();
-      setPosts([...posts, data.post]);
+      if (!data.review) setPosts([...posts, data.post]);
       setMessage('');
       setGifUrl('');
       setReplyTo(null);
+      if (data.review) alert(data.reviewReason || 'Your post is waiting for moderator review.');
     } else {
-      const err = await res.json();
-      alert(err.error || 'Something went wrong.');
+      alert(data.error || 'Something went wrong.');
     }
   }
 
@@ -129,74 +126,72 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
   }
 
   return (
-    <>
-      <div className="topnav">
-        [<Link href="/">Return</Link>] [<Link href={`/${boardSlug}`}>{thread.board.id}</Link>] [<Link href="/catalog">Catalog</Link>] [<a href="#bottom">Bottom</a>] [<a href="#" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>Update</a>]
-      </div>
-      <div className="container">
-        <h1 className="sitetitle">
-          {thread.subject || 'Thread'}{' '}
-          {thread.sticky && <span className="indicator sticky">[STICKY]</span>}
-          {thread.locked && <span className="indicator locked">[LOCKED]</span>}
-          {thread.archived && <span className="indicator archived">[ARCHIVED]</span>}
-        </h1>
-        <div className="subtitle">Thread #{thread.id} — {thread.views} views — {posts.length} posts</div>
+    <main className="container">
+      <div className="page-nav">[<Link href={`/${boardSlug}`}>{thread.board.id}</Link>] [<Link href="/catalog">Catalog</Link>] [<a href="#bottom">Bottom</a>] [<a href="#" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>Update</a>]</div>
+      <h1 className="sitetitle">
+        {thread.subject || 'Thread'}{' '}
+        {thread.sticky && <span className="indicator sticky">[STICKY]</span>}
+        {thread.locked && <span className="indicator locked">[LOCKED]</span>}
+        {thread.archived && <span className="indicator archived">[ARCHIVED]</span>}
+      </h1>
+      <div className="subtitle">Thread #{thread.id} — {thread.views} views — {posts.length} posts</div>
 
-        <WidgetSlot widgets={topWidgets} />
+      <WidgetSlot widgets={topWidgets} />
 
-        {posts.map((p, idx) => {
-          const author = p.author;
-          const avatarVisible = author?.avatarUrl && author.avatarStatus === 'approved';
-          const badge = author?.badge || '';
-          return (
-            <div className={`post ${collapsed[p.id] ? 'post-collapsed' : ''}`} id={`post-${p.id}`} key={p.id}>
-              <div className="post-head">
-                {avatarVisible && <img className="post-avatar" style={avatarStyle} src={author.avatarUrl} alt="" loading="lazy" />}
-                <input type="checkbox" />{' '}
-                <a className="name post-author-name" style={nameStyle(author)} href={author ? `/user/${author.anonId}` : '#'} onClick={!author ? (e) => e.preventDefault() : undefined}>{p.displayName}</a>
-                {author?.anonId && <span className="anon-post-id"> ({author.anonId})</span>}
-                {badge && <span className="post-badge" style={badgeStyle}>[{badge}]</span>}
-                {idx === 0 && <span className="badge op-badge">[OP]</span>}
-                <span className="date">{fmt(p.createdAt)}</span>
-                <span className="postnum">No.{p.postNumber}</span>
-                {p.editedAt && <span className="muted"> (edited {fmt(p.editedAt)})</span>}
-                <a href="#" className="collapse-link" onClick={(e) => { e.preventDefault(); setCollapsed({ ...collapsed, [p.id]: !collapsed[p.id] }); }}>
-                  [{collapsed[p.id] ? '+' : '−'}]
-                </a>
-              </div>
+      {posts.map((p, idx) => {
+        const author = p.author;
+        const avatarVisible = author?.avatarUrl && author.avatarStatus === 'approved';
+        const badge = author?.badge || '';
+        const replyTarget = p.replyToId ? posts.find((target) => target.id === p.replyToId) : null;
+        const isReview = p.status === 'review';
+        return (
+          <div className={`post ${collapsed[p.id] ? 'post-collapsed' : ''}`} id={`post-${p.id}`} key={p.id}>
+            <div className="post-head">
+              {avatarVisible && <img className="post-avatar" style={avatarStyle} src={author.avatarUrl} alt="" loading="lazy" />}
+              <a className="name post-author-name" style={nameStyle(author)} href={author ? `/user/${author.anonId}` : '#'} onClick={!author ? (e) => e.preventDefault() : undefined}>{p.displayName || 'Anonymous'}</a>
+              {author?.anonId && <span className="anon-post-id"> ({author.anonId})</span>}
+              {badge && <span className="post-badge" style={badgeStyle}>[{badge}]</span>}
+              {idx === 0 && <span className="badge op-badge">[OP]</span>}
+              <span className="date">{fmt(p.createdAt)}</span>
+              <span className="postnum">No.{p.postNumber}</span>
+              {p.editedAt && <span className="muted"> (edited {fmt(p.editedAt)})</span>}
+              <a href="#" className="collapse-link" onClick={(e) => { e.preventDefault(); setCollapsed({ ...collapsed, [p.id]: !collapsed[p.id] }); }}>
+                [{collapsed[p.id] ? '+' : '−'}]
+              </a>
+            </div>
 
-              {!collapsed[p.id] && <>
-                {p.replyToId && <div className="quote"><a href="#" onClick={(e) => { e.preventDefault(); jumpTo(p.replyToId); }}>&gt;&gt;{p.replyToId}</a></div>}
+            {!collapsed[p.id] && <>
+              {replyTarget && <div className="quote"><a href="#" onClick={(e) => { e.preventDefault(); jumpTo(replyTarget.id); }}>&gt;&gt;{replyTarget.postNumber}</a></div>}
+              {isReview ? <div className="review-note">⚠ This comment is being reviewed by a moderator.</div> : <>
                 <div className="content">{p.hidden ? '[post removed by moderator]' : p.content}</div>
                 {p.gifUrl && !p.hidden && <div className="post-gif"><img src={p.gifUrl} alt="GIF" loading="lazy" style={gifStyle} /></div>}
-                <div className="actions">
-                  {!thread.locked && !thread.archived && <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(p.id); }}>[Reply]</a>}
-                  <a href="#" onClick={(e) => { e.preventDefault(); report(p.id); }}>[Report]</a>
-                  {isMod && <>
-                    {' '}<a href="#" onClick={(e) => { e.preventDefault(); modAction(p.hidden ? 'restore_post' : 'hide_post', p.id); }}>[{p.hidden ? 'Restore' : 'Hide'}]</a>
-                    {' '}<a href="#" onClick={(e) => { e.preventDefault(); if (confirm('Delete this post?')) modAction('delete_post', p.id); }}>[Delete]</a>
-                  </>}
-                </div>
               </>}
-            </div>
-          );
-        })}
-
-        {!thread.locked && !thread.archived ? (
-          <div className="post">
-            <form onSubmit={submitReply}>
-              {replyTo && <div>Replying to <a href="#" onClick={(e) => { e.preventDefault(); jumpTo(replyTo); }}>&gt;&gt;{replyTo}</a> <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(null); }}>[cancel]</a></div>}
-              <div>Name: <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Anonymous" maxLength={40} /></div>
-              <div>Message:<br /><textarea rows={4} cols={50} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={5000} /></div>
-              <div className="gif-controls"><GifPicker value={gifUrl} onChange={setGifUrl} /></div>
-              <button type="submit">Post Reply</button>
-            </form>
+              <div className="actions">
+                {!thread.locked && !thread.archived && !isReview && <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(p.id); }}>[Reply]</a>}
+                <a href="#" onClick={(e) => { e.preventDefault(); report(p.id); }}>[Report]</a>
+                {isMod && <>
+                  {' '}<a href="#" onClick={(e) => { e.preventDefault(); modAction(p.hidden ? 'restore_post' : 'hide_post', p.id); }}>[{p.hidden ? 'Restore' : 'Hide'}]</a>
+                  {' '}<a href="#" onClick={(e) => { e.preventDefault(); if (confirm('Delete this post?')) modAction('delete_post', p.id); }}>[Delete]</a>
+                </>}
+              </div>
+            </>}
           </div>
-        ) : <p className="locked-notice">[Thread locked — no new replies can be posted]</p>}
+        );
+      })}
 
-        <WidgetSlot widgets={bottomWidgets} />
-        <div id="bottom" className="footer">pourriture.org — {thread.board.id}</div>
-      </div>
-    </>
+      {!thread.locked && !thread.archived ? (
+        <div className="post">
+          <form onSubmit={submitReply}>
+            {replyTo && <div>Replying to <a href="#" onClick={(e) => { e.preventDefault(); jumpTo(replyTo); }}>&gt;&gt;{posts.find((p) => p.id === replyTo)?.postNumber || replyTo}</a> <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(null); }}>[cancel]</a></div>}
+            <div>Message:<br /><textarea rows={4} cols={50} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={5000} /></div>
+            <div className="gif-controls"><GifPicker value={gifUrl} onChange={setGifUrl} /></div>
+            <button type="submit">Post Reply</button>
+          </form>
+        </div>
+      ) : <p className="locked-notice">[Thread locked — no new replies can be posted]</p>}
+
+      <WidgetSlot widgets={bottomWidgets} />
+      <div id="bottom" className="footer">pourriture.org — {thread.board.id}</div>
+    </main>
   );
 }
