@@ -36,10 +36,33 @@ export default function AdminSettings({ settings: initial }) {
     }
   }
 
+  const maintenanceOn = values.maintenance_mode === '1';
+
   return (
     <div className="container">
       <h1 className="sitetitle">Site Settings</h1>
       <p>[<a href="/admin">Back to dashboard</a>]</p>
+
+      <section className="post" style={{ marginBottom: 14, border: maintenanceOn ? '2px solid #a00' : undefined }}>
+        <h2 style={{ marginTop: 0, fontSize: 18 }}>SERVER MAINTENANCE</h2>
+        <p style={{ fontSize: 12 }}>
+          When enabled, normal visitors are sent to the maintenance page. Administrators can still use the site normally.
+        </p>
+        <label style={{ display: 'block', marginBottom: 8 }}>
+          <input
+            type="checkbox"
+            checked={maintenanceOn}
+            onChange={(e) => setValues({ ...values, maintenance_mode: e.target.checked ? '1' : '0' })}
+          />{' '}
+          <b>{maintenanceOn ? 'MAINTENANCE ENABLED' : 'Site online'}</b>
+        </label>
+        <div style={{ fontSize: 11, color: maintenanceOn ? '#900' : '#555' }}>
+          {maintenanceOn
+            ? 'Visitors will see “SERVER MAINTENANCE”. Your admin session remains available.'
+            : 'The public site is available normally.'}
+        </div>
+      </section>
+
       <form onSubmit={save} className="post">
         {FIELDS.map((f) => (
           <div key={f.key} style={{ marginBottom: 10 }}>
