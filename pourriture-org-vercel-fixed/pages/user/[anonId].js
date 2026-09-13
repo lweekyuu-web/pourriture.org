@@ -20,12 +20,13 @@ export async function getServerSideProps({ params }) {
     postCount: user.postCount,
     bio: user.bio || '',
     signature: user.signature || '',
-    avatarUrl: user.avatarUrl || '',
-    bannerUrl: user.bannerUrl || '',
+    avatarUrl: user.avatarStatus === 'approved' ? (user.avatarUrl || '') : '',
+    bannerUrl: user.bannerStatus === 'approved' ? (user.bannerUrl || '') : '',
     profileTheme: user.profileTheme,
     profileLayout: user.profileLayout,
     profileGifUrl: user.profileGifUrl || '',
     avatarStatus: user.avatarStatus,
+    bannerStatus: user.bannerStatus,
     boardIds,
     recentPosts: user.posts.map((p) => ({ postNumber: p.postNumber, content: p.content.slice(0, 160), createdAt: p.createdAt.toISOString(), boardId: p.thread.board.id, threadId: p.thread.id })),
   })) } };
@@ -41,11 +42,11 @@ export default function Profile({ user }) {
     <main className={`container profile-page ${themeClass}`}>
       <div className="topnav">[<Link href="/">Return</Link>] [<Link href="/profile/edit">Edit my profile</Link>]</div>
       {user.bannerUrl && <div className="profile-banner"><img src={user.bannerUrl} alt="" /></div>}
-      <section className={`profile-header ${user.profileLayout === 'profile' ? 'profile-layout-first' : ''}`}>
-        {user.avatarUrl && user.avatarStatus === 'approved' ? <img className="profile-avatar" src={user.avatarUrl} alt="" /> : <div className="profile-avatar avatar-placeholder">?</div>}
+      <section className={`profile-header ${user.profileLayout === 'profile' ? 'profile-layout-first' : ''} ${user.profileLayout === 'imageboard' ? 'profile-layout-imageboard' : ''}`}>
+        {user.avatarUrl ? <img className="profile-avatar" src={user.avatarUrl} alt="" /> : <div className="profile-avatar avatar-placeholder">?</div>}
         <div className="profile-title">
           <h1 className="sitetitle">{user.displayName}</h1>
-          <div><span className="badge">[{user.badge}]</span> <span className="user-status">[{user.status}]</span></div>
+          <div><span className="badge badge-sparkle">[{user.badge}]</span> <span className="user-status">[{user.status}]</span></div>
           <div className="profile-id">Anonymous #{user.anonId}</div>
         </div>
       </section>
