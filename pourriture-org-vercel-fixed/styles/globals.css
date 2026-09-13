@@ -1,344 +1,113 @@
 /* Esthétique volontairement datée: forum/imageboard ~2005-2012 */
 * { box-sizing: border-box; }
-
-body {
-  background: #eef0fa;
-  color: #222;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  margin: 0;
-  padding: 0;
-}
-
+body { background: #eef0fa; color: #222; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13px; margin: 0; padding: 0; }
 a { color: #0000ee; text-decoration: underline; }
 a:visited { color: #551a8b; }
-
-/* --- Site header (global nav) --- */
-.site-header {
-  background: #d6daf0;
-  border-bottom: 1px solid #b7c5d9;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-.site-header-logo {
-  display: inline-block;
-  margin-right: 12px;
-}
-.wordmark-link {
-  font-family: 'Arial Black', Impact, Haettenschweiler, sans-serif;
-  font-weight: 900;
-  font-size: 16px;
-  color: #2f6b2f;
-  letter-spacing: 1px;
-  text-decoration: none;
-}
+.site-header { background: #d6daf0; border-bottom: 1px solid #b7c5d9; padding: 4px 8px; font-size: 12px; }
+.site-header-logo { display: inline-block; margin-right: 12px; }
+.wordmark-link { font-family: 'Arial Black', Impact, Haettenschweiler, sans-serif; font-weight: 900; font-size: 16px; color: #2f6b2f; letter-spacing: 1px; text-decoration: none; }
 .wordmark-link:visited { color: #2f6b2f; }
-.site-header-nav {
-  display: inline-block;
-}
-.site-header-identity {
-  float: right;
-  font-size: 11px;
-  color: #555;
-}
+.site-header-nav { display: inline-block; }
+.site-header-identity { float: right; font-size: 11px; color: #555; }
 .anon-id { color: #117743; font-weight: bold; }
-
-/* --- Site footer --- */
-.site-footer {
-  text-align: center;
-  font-size: 10px;
-  color: #888;
-  margin-top: 30px;
-  padding: 10px;
-  border-top: 1px solid #b7c5d9;
-  background: #e4e7f2;
-}
+.site-footer { text-align: center; font-size: 10px; color: #888; margin-top: 30px; padding: 10px; border-top: 1px solid #b7c5d9; background: #e4e7f2; }
 .footer-links { margin-bottom: 6px; }
 .footer-info { line-height: 1.6; }
-
-/* --- Top nav (page-specific) --- */
-.topnav {
-  background: #d6daf0;
-  border-bottom: 1px solid #b7c5d9;
-  padding: 3px 8px;
-  font-size: 12px;
-}
+.topnav { background: #d6daf0; border-bottom: 1px solid #b7c5d9; padding: 3px 8px; font-size: 12px; }
 .topnav a { margin-right: 6px; color: #0000ee; }
-
 .container { max-width: 900px; margin: 0 auto; padding: 8px; }
-
-h1.sitetitle {
-  font-size: 22px;
-  color: #af0a0f;
-  text-align: center;
-  margin: 10px 0 4px 0;
-  font-family: Arial, sans-serif;
-}
-h2.mod-subtitle {
-  text-align: center;
-  font-size: 14px;
-  color: #555;
-  margin: 0 0 10px 0;
-  font-family: Tahoma, sans-serif;
-}
+h1.sitetitle { font-size: 22px; color: #af0a0f; text-align: center; margin: 10px 0 4px 0; font-family: Arial, sans-serif; }
+h2.mod-subtitle { text-align: center; font-size: 14px; color: #555; margin: 0 0 10px 0; font-family: Tahoma, sans-serif; }
 .subtitle { text-align: center; font-size: 11px; color: #555; margin-bottom: 14px; }
-
-.stats-block {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  background: #f9f9ff;
-  border: 1px solid #b7c5d9;
-  padding: 8px;
-  margin: 10px 0;
-}
-
-.notification {
-  background: #fff8d6;
-  border: 1px solid #d9c46a;
-  color: #665500;
-  padding: 4px 8px;
-  font-size: 12px;
-  margin: 8px 0;
-  font-weight: bold;
-}
-
-/* --- MOTD --- */
-.motd-editor {
-  border: 1px dashed #af0a0f;
-  background: #fff0f0;
-  padding: 8px;
-  margin-bottom: 10px;
-  font-size: 12px;
-}
+.stats-block { font-family: 'Courier New', monospace; font-size: 12px; background: #f9f9ff; border: 1px solid #b7c5d9; padding: 8px; margin: 10px 0; }
+.notification { background: #fff8d6; border: 1px solid #d9c46a; color: #665500; padding: 4px 8px; font-size: 12px; margin: 8px 0; font-weight: bold; }
+.motd-editor { border: 1px dashed #af0a0f; background: #fff0f0; padding: 8px; margin-bottom: 10px; font-size: 12px; }
 .motd-editor textarea { width: 100%; max-width: 500px; display: block; margin: 6px 0; }
 .motd-edit-hint { font-size: 10px; color: #af0a0f; }
-
-.motd {
-  border: 1px solid #d9c46a;
-  background: #fff8d6;
-  color: #665500;
-  padding: 6px 8px;
-  margin-bottom: 10px;
-  font-size: 12px;
-  white-space: pre-wrap;
-}
-
-/* --- Board list (homepage) --- */
-.board-row {
-  border: 1px solid #b7c5d9;
-  background: #f9f9ff;
-  padding: 6px 8px;
-  margin-bottom: 6px;
-}
+.motd { border: 1px solid #d9c46a; background: #fff8d6; color: #665500; padding: 6px 8px; margin-bottom: 10px; font-size: 12px; white-space: pre-wrap; }
+.board-row { border: 1px solid #b7c5d9; background: #f9f9ff; padding: 6px 8px; margin-bottom: 6px; }
 .board-row .bid { color: #af0a0f; font-weight: bold; }
 .board-row .desc { color: #555; font-size: 12px; }
 .board-row .meta { font-size: 11px; color: #777; margin-top: 2px; }
-
-/* --- Catalog filters --- */
-.catalog-filters {
-  font-size: 12px;
-  margin-bottom: 10px;
-  color: #555;
-}
-
-/* --- Thread listing --- */
+.catalog-filters { font-size: 12px; margin-bottom: 10px; color: #555; }
 .thread-listing { margin-bottom: 4px; }
 .thread-head { margin-bottom: 4px; }
 .thread-num { color: #af0a0f; font-weight: bold; font-size: 11px; }
 .thread-meta { font-size: 11px; color: #777; }
-
-/* --- Thread indicators --- */
 .thread-indicators { font-size: 11px; }
 .indicator { font-size: 10px; font-weight: bold; margin-left: 2px; }
 .indicator.sticky { color: #cc6600; }
 .indicator.locked { color: #af0a0f; }
 .indicator.archived { color: #777; }
-
-/* --- Pagination --- */
-.pagination {
-  text-align: center;
-  margin: 10px 0;
-  font-size: 12px;
-}
+.pagination { text-align: center; margin: 10px 0; font-size: 12px; }
 .pagination a { margin: 0 3px; }
-.pagination .page-current {
-  margin: 0 3px;
-  font-weight: bold;
-  color: #af0a0f;
-}
-
-/* --- Posts --- */
-.post {
-  border: 1px solid #b7c5d9;
-  background: #f9f9ff;
-  padding: 6px 8px;
-  margin-bottom: 6px;
-}
+.pagination .page-current { margin: 0 3px; font-weight: bold; color: #af0a0f; }
+.post { border: 1px solid #b7c5d9; background: #f9f9ff; padding: 6px 8px; margin-bottom: 6px; }
 .post .head { font-size: 12px; margin-bottom: 4px; }
+.post .post-head { font-size: 12px; margin-bottom: 4px; }
 .post .name { color: #117743; font-weight: bold; }
-.post .badge {
-  font-size: 10px;
-  border: 1px solid #999;
-  padding: 0 3px;
-  margin-left: 4px;
-  background: #e0e0e0;
-}
+.post .badge { font-size: 10px; border: 1px solid #999; padding: 0 3px; margin-left: 4px; background: #e0e0e0; }
 .post .op-badge { color: #af0a0f; border-color: #af0a0f; background: #fff0f0; }
 .post .postnum { color: #789922; margin-left: 6px; font-size: 11px; }
 .post .date { color: #333; font-size: 11px; margin-left: 6px; }
 .post .content { white-space: pre-wrap; margin: 4px 0; }
 .post .actions a { font-size: 11px; margin-right: 8px; }
-.post .quote { color: #789922; }
-
-/* --- User status & badges --- */
+.post .quote { color: #789922; margin: 3px 0; }
+.post .quote a { color: #789922; }
+.post-highlight { outline: 2px solid #d9c46a; }
+.post-collapsed { min-height: 28px; }
+.collapse-link { float: right; font-size: 11px; }
+.post-gif { margin: 5px 0; }
+.post-gif img { max-width: min(480px, 100%); max-height: 360px; display: block; border: 1px solid #b7c5d9; }
+.gif-controls { margin: 5px 0; }
+.gif-picker-wrap { position: relative; display: inline-block; }
+.gif-picker-wrap > button { margin-right: 4px; }
+.gif-selected { margin-top: 5px; }
+.gif-selected img { max-width: 260px; max-height: 180px; border: 1px solid #999; display: block; }
+.gif-picker { position: absolute; z-index: 20; left: 0; top: 25px; width: min(520px, calc(100vw - 20px)); background: #f9f9ff; border: 1px solid #888; padding: 6px; box-shadow: 2px 2px 0 #aaa; }
+.gif-picker-head { background: #d6daf0; border: 1px solid #b7c5d9; padding: 3px 5px; margin-bottom: 5px; }
+.gif-picker-head a { float: right; }
+.gif-search { display: flex; gap: 4px; margin-bottom: 6px; }
+.gif-search input { flex: 1; min-width: 0; }
+.gif-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; max-height: 260px; overflow-y: auto; }
+.gif-item { padding: 0; border: 1px solid #bbb; background: #eee; min-width: 0; }
+.gif-item:hover { border-color: #555; }
+.gif-item img { width: 100%; height: 70px; object-fit: cover; display: block; }
+.gif-note { margin-top: 5px; }
 .user-status { font-size: 10px; color: #777; margin-left: 4px; }
-
-/* --- Forms --- */
-textarea, input[type=text], input[type=password], input[type=number], select {
-  font-family: Verdana, Arial, sans-serif;
-  font-size: 12px;
-  border: 1px solid #999;
-  padding: 2px;
-}
-
-button, input[type=submit] {
-  font-family: Verdana, Arial, sans-serif;
-  font-size: 12px;
-  border: 1px solid #888;
-  background: #e4e4e4;
-  padding: 2px 8px;
-  cursor: pointer;
-}
+textarea, input[type=text], input[type=password], input[type=number], select { font-family: Verdana, Arial, sans-serif; font-size: 12px; border: 1px solid #999; padding: 2px; }
+button, input[type=submit] { font-family: Verdana, Arial, sans-serif; font-size: 12px; border: 1px solid #888; background: #e4e4e4; padding: 2px 8px; cursor: pointer; }
 button:hover { background: #d4d4d4; }
-
-/* --- Admin tables --- */
 table.admin { border-collapse: collapse; width: 100%; font-size: 12px; }
-table.admin td, table.admin th {
-  border: 1px solid #b7c5d9;
-  padding: 4px 6px;
-  text-align: left;
-}
+table.admin td, table.admin th { border: 1px solid #b7c5d9; padding: 4px 6px; text-align: left; }
 table.admin th { background: #d6daf0; }
-
-/* --- Footer (page-specific) --- */
 .footer { text-align: center; font-size: 10px; color: #888; margin-top: 30px; padding: 10px; }
-
-/* --- Widgets / publicités --- */
 .widget-slot { margin: 8px 0; }
-.widget {
-  border: 1px dashed #999;
-  background: #f3f3e8;
-  padding: 4px;
-  margin-bottom: 6px;
-  text-align: center;
-  position: relative;
-}
+.widget { border: 1px dashed #999; background: #f3f3e8; padding: 4px; margin-bottom: 6px; text-align: center; position: relative; }
 .widget-banner-img { max-width: 100%; display: block; margin: 0 auto; }
-.widget-tag {
-  position: absolute;
-  top: 2px; left: 4px;
-  font-size: 8px;
-  color: #999;
-  text-transform: uppercase;
-}
-
-/* --- Site logo text (homepage) --- */
-.site-logo-text {
-  text-align: center;
-  margin: 10px auto 0 auto;
-  padding: 8px 0 6px 0;
-  background: #e4e7f2;
-  border: 1px solid #9aa6c4;
-  max-width: 100%;
-}
-.site-logo-text .wordmark {
-  font-family: 'Arial Black', Impact, Haettenschweiler, sans-serif;
-  font-weight: 900;
-  font-size: 30px;
-  color: #2f6b2f;
-  letter-spacing: 1px;
-}
-.site-logo-text .est-line {
-  font-family: Verdana, sans-serif;
-  font-size: 10px;
-  color: #6b6b58;
-  margin-top: 4px;
-}
-
-/* --- Search --- */
+.widget-tag { position: absolute; top: 2px; left: 4px; font-size: 8px; color: #999; text-transform: uppercase; }
+.site-logo-text { text-align: center; margin: 10px auto 0 auto; padding: 8px 0 6px 0; background: #e4e7f2; border: 1px solid #9aa6c4; max-width: 100%; }
+.site-logo-text .wordmark { font-family: 'Arial Black', Impact, Haettenschweiler, sans-serif; font-weight: 900; font-size: 30px; color: #2f6b2f; letter-spacing: 1px; }
+.site-logo-text .est-line { font-family: Verdana, sans-serif; font-size: 10px; color: #6b6b58; margin-top: 4px; }
 .search-form { margin-bottom: 16px; }
 .search-form input[type=text] { width: 200px; }
 .search-result { font-size: 12px; }
-
-/* --- Profile --- */
 .profile-box { margin: 10px 0; }
-
-/* --- Rules / FAQ --- */
 .rules-section, .faq-section { margin: 10px 0; }
-.rules-section h3, .faq-section h3 {
-  font-size: 14px;
-  color: #333;
-  margin: 14px 0 6px 0;
-  font-family: Tahoma, sans-serif;
-}
-.rules-text {
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  white-space: pre-wrap;
-  margin: 4px 0;
-}
-.board-rules {
-  border: 1px solid #d9c46a;
-  background: #fff8d6;
-  padding: 6px 8px;
-  margin-bottom: 10px;
-  font-size: 12px;
-}
-.last-modified {
-  font-size: 10px;
-  color: #999;
-  margin-top: 20px;
-  font-style: italic;
-}
-
-/* --- Archive --- */
-.archive-note {
-  font-size: 10px;
-  color: #999;
-  margin-top: 20px;
-  font-style: italic;
-}
-
-/* --- 404 / Error pages --- */
-.error-page {
-  text-align: center;
-  padding: 40px 0;
-}
-.error-page h2 {
-  font-size: 18px;
-  color: #af0a0f;
-  font-family: Arial, sans-serif;
-}
-.locked-notice {
-  text-align: center;
-  color: #af0a0f;
-  font-size: 12px;
-  padding: 10px;
-}
-
-/* --- Moderator space --- */
+.rules-section h3, .faq-section h3 { font-size: 14px; color: #333; margin: 14px 0 6px 0; font-family: Tahoma, sans-serif; }
+.rules-text { font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; margin: 4px 0; }
+.board-rules { border: 1px solid #d9c46a; background: #fff8d6; padding: 6px 8px; margin-bottom: 10px; font-size: 12px; }
+.last-modified { font-size: 10px; color: #999; margin-top: 20px; font-style: italic; }
+.archive-note { font-size: 10px; color: #999; margin-top: 20px; font-style: italic; }
+.error-page { text-align: center; padding: 40px 0; }
+.error-page h2 { font-size: 18px; color: #af0a0f; font-family: Arial, sans-serif; }
+.locked-notice { text-align: center; color: #af0a0f; font-size: 12px; padding: 10px; }
 .mod-subtitle { font-family: Tahoma, sans-serif; }
 .warn-form { background: #fff8d6; border-color: #d9c46a; }
 .perm-list { margin: 6px 0; }
 .perm-list label { display: inline-block; margin-right: 12px; font-size: 11px; }
-
-/* --- Report items --- */
 .report-item { border-color: #d9c46a; }
-
-/* --- Muted text --- */
 .muted { color: #999; font-size: 11px; }
-
-/* --- Responsive --- */
 @media (max-width: 600px) {
   body { font-size: 12px; }
   .site-header-nav { display: block; }
@@ -346,9 +115,11 @@ table.admin th { background: #d6daf0; }
   .container { padding: 4px; }
   h1.sitetitle { font-size: 18px; }
   .site-logo-text .wordmark { font-size: 22px; }
-  table.admin { font-size: 11px; }
+  table.admin { font-size: 11px; display: block; overflow-x: auto; }
   table.admin td, table.admin th { padding: 2px 3px; }
   textarea { width: 100%; }
   .post { padding: 4px 6px; }
   .thread-meta { font-size: 10px; }
+  .gif-grid { grid-template-columns: repeat(3, 1fr); }
+  .gif-picker { width: calc(100vw - 20px); }
 }
