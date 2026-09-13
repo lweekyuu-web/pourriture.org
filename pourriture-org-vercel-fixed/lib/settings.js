@@ -12,6 +12,7 @@ const DEFAULTS = {
   established_year: '2009',
   site_version: '3.7',
   last_updated: '2017',
+  maintenance_mode: '0',
 };
 
 async function getAllSettings() {
