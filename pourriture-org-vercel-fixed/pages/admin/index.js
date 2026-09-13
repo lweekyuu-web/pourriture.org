@@ -17,7 +17,6 @@ export async function getServerSideProps({ req }) {
     prisma.badge.count(),
   ]);
 
-  // Most active board
   const boardStats = await prisma.thread.groupBy({
     by: ['boardId'],
     _count: true,
@@ -33,10 +32,10 @@ export default function AdminDashboard({ stats }) {
   async function runSeed() {
     const res = await fetch('/api/admin/seed', { method: 'POST' });
     if (res.ok) {
-      alert('Database seeded with demo data.');
+      alert('Database populated with initial data.');
       window.location.reload();
     } else {
-      alert('Error during seed.');
+      alert('Error during database setup.');
     }
   }
 
@@ -62,13 +61,14 @@ Most active board: ${stats.mostActiveBoard}
         [<Link href="/admin/moderators">Moderators</Link>]{' '}
         [<Link href="/admin/widgets">Widgets / Ads</Link>]{' '}
         [<Link href="/admin/settings">Settings</Link>]{' '}
+        [<Link href="/admin/security">Security / IP</Link>]{' '}
         [<Link href="/mod">Moderator Space</Link>]{' '}
         [<Link href="/status">Statistics</Link>]{' '}
         [<Link href="/">Back to site</Link>]
       </p>
       {stats.boards === 0 && (
         <p>
-          No data in database. <a href="#" onClick={(e) => { e.preventDefault(); runSeed(); }}>[Seed demo data]</a>
+          No data in database. <a href="#" onClick={(e) => { e.preventDefault(); runSeed(); }}>[Populate initial data]</a>
         </p>
       )}
     </div>
