@@ -6,7 +6,7 @@ function isAllowedGif(url) {
   if (!url) return true;
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' && /(^|\.)giphy\.com$/.test(parsed.hostname);
+    return parsed.protocol === 'https:' && /(^|\.)giphy\.com$/i.test(parsed.hostname);
   } catch {
     return false;
   }
@@ -27,11 +27,14 @@ async function moderateInput(message, gifUrl) {
     if (!response.ok) return { textFlagged: false, gifFlagged: false, aiAvailable: false };
     const data = await response.json();
     const results = data.results || [];
-    return {
-      textFlagged: Boolean(results[0]?.flagged && input[0]?.type === 'text') || Boolean(results[1]?.flagged && input[1]?.type === 'text'),
-      gifFlagged: Boolean(results[0]?.flagged && input[0]?.type === 'image_url') || Boolean(results[1]?.flagged && input[1]?.type === 'image_url'),
-      aiAvailable: true,
-    };
+    let textFlagged = false;
+    let gifFlagged = false;
+    input.forEach((item, index) => {
+      if (!results[index]?.flagged) return;
+      if (item.type === 'text') textFlagged = true;
+      if (item.type === 'image_url') gifFlagged = true;
+    });
+    return { textFlagged, gifFlagged, aiAvailable: true };
   } catch (_) {
     return { textFlagged: false, gifFlagged: false, aiAvailable: false };
   }
@@ -39,8 +42,8 @@ async function moderateInput(message, gifUrl) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-  const { threadId, name, message, replyToId, gifUrl } = req.body;
-  if ((!message || !message.trim()) && !gifUrl) return res.status(400).json({ error: 'Message or GIF required' });
+  const { threadId, message, replyToId, gifUrl } = req.body;
+  if ((!message || !String(message).trim()) && !gifUrl) return res.status(400).json({ error: 'Message or GIF required' });
   if (gifUrl && !isAllowedGif(gifUrl)) return res.status(400).json({ error: 'Only GIFs returned by the configured GIF provider are allowed.' });
 
   const thread = await prisma.thread.findUnique({ where: { id: threadId } });
@@ -51,14 +54,25 @@ export default async function handler(req, res) {
   if (await isBanned(uid)) return res.status(403).json({ error: 'This identity has been banned from posting.' });
   if (await isFlooding(uid)) return res.status(429).json({ error: 'You are posting too fast. Please slow down.' });
 
-  const cleanMessage = String(message || '').trim();
+  const cleanMessage = String(message || '').trim().slice(0, 5000);
   if (cleanMessage && containsBannedContent(cleanMessage)) return res.status(400).json({ error: 'Your message was rejected by the content filter.' });
 
-  const ai = await moderateInput(cleanMessage, gifUrl);
-  const heldForReview = Boolean(gifUrl) || ai.textFlagged || ai.gifFlagged;
-  const reviewReason = ai.gifFlagged || ai.textFlagged ? 'AI moderation flagged this submission; moderator review required.' : (gifUrl ? 'GIF posts are held for moderator review.' : null);
+  let replyTarget = null;
+  if (replyToId !== null && typeof replyToId !== 'undefined' && replyToId !== '') {
+    const parsedReplyId = Number(replyToId);
+    if (!Number.isInteger(parsedReplyId)) return res.status(400).json({ error: 'Invalid reply target.' });
+    replyTarget = await prisma.post.findFirst({ where: { id: parsedReplyId, threadId }, select: { id: true } });
+    if (!replyTarget) return res.status(400).json({ error: 'Reply target is not in this thread.' });
+  }
 
-  let authorDisplayName = name?.trim() || 'Anonymous';
+  const ai = await moderateInput(cleanMessage, gifUrl);
+  const aiNeedsReview = !ai.aiAvailable && Boolean(gifUrl);
+  const heldForReview = ai.textFlagged || ai.gifFlagged || aiNeedsReview;
+  const reviewReason = ai.textFlagged || ai.gifFlagged
+    ? 'AI moderation flagged this submission; moderator review required.'
+    : (aiNeedsReview ? 'GIF moderation is unavailable; moderator review required.' : null);
+
+  let authorDisplayName = 'Anonymous';
   if (uid) {
     const author = await prisma.user.findUnique({ where: { id: uid }, select: { displayName: true } });
     if (author?.displayName?.trim()) authorDisplayName = author.displayName.trim();
@@ -71,7 +85,7 @@ export default async function handler(req, res) {
       displayName: authorDisplayName,
       content: cleanMessage,
       gifUrl: gifUrl || null,
-      replyToId: replyToId || null,
+      replyToId: replyTarget?.id || null,
       authorId: uid || null,
       hidden: heldForReview,
       status: heldForReview ? 'review' : 'active',
