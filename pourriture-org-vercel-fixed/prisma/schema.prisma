@@ -40,6 +40,8 @@ model User {
   status          String    @default("New user")
   banned          Boolean   @default(false)
   suspendedUntil  DateTime?
+  adminTitle      String?
+  adminPermissions String[] @default([])
   posts           Post[]
   warnings        Warning[]
   modActions      ModerationAction[] @relation("ModeratorActions")
@@ -158,7 +160,7 @@ model ModerationAction {
   targetType  String
   targetId    String
   reason      String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }
 
 model DirectMessage {
@@ -170,7 +172,7 @@ model DirectMessage {
   subject     String   @default("Contact")
   content     String
   readAt      DateTime?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   @@index([recipientId, createdAt])
   @@index([senderId, createdAt])
 }
