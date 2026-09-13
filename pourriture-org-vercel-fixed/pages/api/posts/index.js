@@ -4,6 +4,7 @@ import { containsBannedContent, isFlooding, isBanned } from '../../../lib/modera
 
 function isAllowedImage(url) {
   if (!url) return true;
+  if (url.startsWith('data:image/')) return /^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(url) && url.length <= 2100000;
   try {
     const parsed = new URL(url);
     return parsed.protocol === 'https:' && parsed.hostname.length <= 253;
@@ -38,9 +39,7 @@ async function moderateInput(message, gifUrl, imageUrl) {
     if (!response.ok) return { textFlagged: false, gifFlagged: false, imageFlagged: false, aiAvailable: false };
     const data = await response.json();
     const results = data.results || [];
-    let textFlagged = false;
-    let gifFlagged = false;
-    let imageFlagged = false;
+    let textFlagged = false, gifFlagged = false, imageFlagged = false;
     input.forEach((item, index) => {
       if (!results[index]?.flagged) return;
       if (item.type === 'text') textFlagged = true;
@@ -58,7 +57,7 @@ export default async function handler(req, res) {
   const { threadId, message, replyToId, gifUrl, imageUrl } = req.body;
   if ((!message || !String(message).trim()) && !gifUrl && !imageUrl) return res.status(400).json({ error: 'Message, GIF or image required' });
   if (gifUrl && !isAllowedGif(gifUrl)) return res.status(400).json({ error: 'Only GIFs returned by the configured GIF provider are allowed.' });
-  if (imageUrl && !isAllowedImage(imageUrl)) return res.status(400).json({ error: 'Image must use a valid HTTPS URL.' });
+  if (imageUrl && !isAllowedImage(imageUrl)) return res.status(400).json({ error: 'Image must be a valid HTTPS image URL or a supported uploaded image under 1.5 MB.' });
 
   const thread = await prisma.thread.findUnique({ where: { id: threadId } });
   if (!thread) return res.status(404).json({ error: 'Thread not found' });
@@ -80,11 +79,13 @@ export default async function handler(req, res) {
   }
 
   const ai = await moderateInput(cleanMessage, gifUrl, imageUrl);
-  const mediaNeedsReview = (!ai.aiAvailable && Boolean(gifUrl || imageUrl));
+  // Trust the AI when it is available: only a positive moderation flag creates a review item.
+  // If the AI service is unavailable, media is held rather than silently published.
+  const mediaNeedsReview = !ai.aiAvailable && Boolean(gifUrl || imageUrl);
   const heldForReview = ai.textFlagged || ai.gifFlagged || ai.imageFlagged || mediaNeedsReview;
   const reviewReason = ai.textFlagged || ai.gifFlagged || ai.imageFlagged
     ? 'AI moderation flagged this submission; moderator review required.'
-    : (mediaNeedsReview ? 'Image moderation is unavailable; moderator review required.' : null);
+    : (mediaNeedsReview ? 'Automatic image moderation is temporarily unavailable; this media will be reviewed.' : null);
 
   let authorDisplayName = 'Anonymous';
   if (uid) {
@@ -94,26 +95,14 @@ export default async function handler(req, res) {
 
   const post = await prisma.post.create({
     data: {
-      postNumber: generatePostNumber(),
-      threadId,
-      displayName: authorDisplayName,
-      content: cleanMessage,
-      gifUrl: gifUrl || null,
-      imageUrl: imageUrl || null,
-      replyToId: replyTarget?.id || null,
-      authorId: uid || null,
-      hidden: heldForReview,
-      status: heldForReview ? 'review' : 'active',
+      postNumber: generatePostNumber(), threadId, displayName: authorDisplayName, content: cleanMessage,
+      gifUrl: gifUrl || null, imageUrl: imageUrl || null, replyToId: replyTarget?.id || null, authorId: uid || null,
+      hidden: heldForReview, status: heldForReview ? 'review' : 'active',
     },
   });
-
   await prisma.thread.update({ where: { id: threadId }, data: { bumpedAt: new Date() } });
   if (uid) await prisma.user.update({ where: { id: uid }, data: { postCount: { increment: 1 } } });
 
-  const postWithAuthor = await prisma.post.findUnique({
-    where: { id: post.id },
-    include: { author: { select: { anonId: true, displayName: true, badge: true, avatarUrl: true, avatarStatus: true, profileNameColor: true, profileNameStyle: true } } },
-  });
-
+  const postWithAuthor = await prisma.post.findUnique({ where: { id: post.id }, include: { author: { select: { anonId: true, displayName: true, badge: true, avatarUrl: true, avatarStatus: true, profileNameColor: true, profileNameStyle: true } } } });
   return res.status(201).json({ post: JSON.parse(JSON.stringify(postWithAuthor)), review: heldForReview, reviewReason, aiModerated: ai.aiAvailable });
 }
