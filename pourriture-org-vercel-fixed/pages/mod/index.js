@@ -6,24 +6,27 @@ export async function getServerSideProps({ req }) {
   const isMod = await isModeratorReq(req);
   if (!isMod) return { redirect: { destination: '/admin/login', permanent: false } };
 
-  const [pendingReports, lockedThreads, bannedUsers, pendingActions, reviewItems] = await Promise.all([
+  const [pendingReports, lockedThreads, bannedUsers, pendingActions, reviewItems, profileMedia] = await Promise.all([
     prisma.report.count({ where: { status: 'pending' } }),
     prisma.thread.count({ where: { locked: true } }),
     prisma.user.count({ where: { banned: true } }),
     prisma.moderationAction.count({ where: { createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } }),
     prisma.post.count({ where: { status: 'review' } }),
+    prisma.user.count({ where: { OR: [{ avatarStatus: 'review' }, { bannerStatus: 'review' }] } }),
   ]);
 
-  return { props: { stats: { pendingReports, lockedThreads, bannedUsers, pendingActions, reviewItems } } };
+  return { props: { stats: { pendingReports, lockedThreads, bannedUsers, pendingActions, reviewItems, profileMedia } } };
 }
 
 export default function ModDashboard({ stats }) {
+  const totalQueue = stats.pendingReports + stats.reviewItems + stats.profileMedia;
   return (
     <div className="container">
       <h1 className="sitetitle">POURRITURE.ORG</h1>
       <h2 className="mod-subtitle">MODERATOR SPACE</h2>
       <pre className="stats-block">{`Reports: ${stats.pendingReports}
-Review queue: ${stats.reviewItems}
+Posts / GIFs: ${stats.reviewItems}
+Profile media: ${stats.profileMedia}
 Pending actions: ${stats.pendingActions}
 Locked threads: ${stats.lockedThreads}
 Banned users: ${stats.bannedUsers}`}</pre>
@@ -39,9 +42,7 @@ Banned users: ${stats.bannedUsers}`}</pre>
         [<Link href="/admin">Admin</Link>]{' '}
         [<Link href="/">Back to site</Link>]
       </p>
-      {(stats.pendingReports > 0 || stats.reviewItems > 0) && (
-        <div className="notification">[{stats.pendingReports + stats.reviewItems} ITEMS NEED MODERATION]</div>
-      )}
+      {totalQueue > 0 && <div className="notification">[{totalQueue} ITEMS NEED MODERATION]</div>}
     </div>
   );
 }
