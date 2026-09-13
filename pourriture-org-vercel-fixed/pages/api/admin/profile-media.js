@@ -1,8 +1,9 @@
 import prisma from '../../../lib/prisma';
-import { isAdminRequest } from '../../../lib/admin';
+import { isModeratorReq } from '../../../lib/permissions';
+import { getUidFromReq } from '../../../lib/identity';
 
 export default async function handler(req, res) {
-  if (!isAdminRequest(req)) return res.status(403).json({ error: 'forbidden' });
+  if (!(await isModeratorReq(req))) return res.status(403).json({ error: 'forbidden' });
   if (req.method !== 'POST') return res.status(405).end();
 
   const { userId, type, action } = req.body || {};
@@ -17,6 +18,7 @@ export default async function handler(req, res) {
   const urlField = type === 'avatar' ? 'avatarUrl' : 'bannerUrl';
   const aiField = type === 'avatar' ? 'avatarAiFlagged' : 'bannerAiFlagged';
   const keepImage = action === 'approve';
+  const moderatorId = getUidFromReq(req);
 
   const updated = await prisma.user.update({
     where: { id: userId },
@@ -24,6 +26,16 @@ export default async function handler(req, res) {
       [field]: keepImage ? 'approved' : 'rejected',
       [aiField]: false,
       ...(keepImage ? {} : { [urlField]: null }),
+    },
+  });
+
+  await prisma.moderationAction.create({
+    data: {
+      moderatorId,
+      action: `${action}_${type}`,
+      targetType: 'user_profile_media',
+      targetId: userId,
+      reason: keepImage ? 'Profile media approved.' : 'Profile media rejected and removed.',
     },
   });
 
