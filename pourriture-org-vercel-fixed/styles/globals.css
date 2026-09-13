@@ -13,8 +13,8 @@ a:visited { color: #551a8b; }
 .site-footer { text-align: center; font-size: 10px; color: #888; margin-top: 30px; padding: 10px; border-top: 1px solid #b7c5d9; background: #e4e7f2; }
 .footer-links { margin-bottom: 6px; }
 .footer-info { line-height: 1.6; }
-.topnav { background: #d6daf0; border-bottom: 1px solid #b7c5d9; padding: 3px 8px; font-size: 12px; }
-.topnav a { margin-right: 6px; color: #0000ee; }
+.topnav, .page-nav { background: #d6daf0; border-bottom: 1px solid #b7c5d9; padding: 3px 8px; font-size: 12px; margin-bottom: 6px; }
+.topnav a, .page-nav a { margin-right: 6px; color: #0000ee; }
 .container { max-width: 900px; margin: 0 auto; padding: 8px; }
 h1.sitetitle { font-size: 22px; color: #af0a0f; text-align: center; margin: 10px 0 4px 0; font-family: Arial, sans-serif; }
 h2.mod-subtitle { text-align: center; font-size: 14px; color: #555; margin: 0 0 10px 0; font-family: Tahoma, sans-serif; }
