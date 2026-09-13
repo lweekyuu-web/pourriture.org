@@ -19,6 +19,8 @@ model User {
   displayName     String?
   recoveryKeyHash String?
   createdAt       DateTime  @default(now())
+  lastLoginAt     DateTime?
+  lastLoginIp     String?
   postCount       Int       @default(0)
   badge           String    @default("Newbie")
   role            String    @default("user")
@@ -139,7 +141,7 @@ model ModerationAction {
   targetType  String
   targetId    String
   reason      String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }
 
 model Widget {
