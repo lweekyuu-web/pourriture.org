@@ -24,11 +24,12 @@ export function SiteHeader({ isAdmin }) {
         [<Link href="/search">Search</Link>]{' '}
         [<Link href="/faq">FAQ</Link>]{' '}
         [<Link href="/rules">Rules</Link>]
+        {identity && <> {' '}[<Link href={`/user/${identity.anonId}`}>Profile</Link>] [<Link href="/profile/edit">Edit profile</Link>]</>}
         {isAdmin && ' '}[<Link href="/admin">Admin</Link>]
       </div>
       <div className="site-header-identity">
         {identity ? (
-          <span className="anon-id">Anonymous #{identity.anonId}</span>
+          <span className="anon-id"><Link href={`/user/${identity.anonId}`}>Anonymous #{identity.anonId}</Link></span>
         ) : (
           <span className="anon-id">Anonymous</span>
         )}
@@ -50,7 +51,7 @@ export function SiteFooter() {
       <div className="footer-info">
         <div><b>POURRITURE.ORG</b></div>
         <div>Established 2009</div>
-        <div>This is a fictional experimental community.</div>
+        <div>Community forum</div>
         <div>v3.7 — Last updated: 2017</div>
       </div>
     </div>
@@ -70,11 +71,7 @@ export function ThreadIndicator({ thread }) {
 export function Badge({ badge, color }) {
   if (!badge) return null;
   const c = color || '#808080';
-  return (
-    <span className="badge" style={{ borderColor: c, color: c }}>
-      [{badge.toUpperCase()}]
-    </span>
-  );
+  return <span className="badge" style={{ borderColor: c, color: c }}>[{badge.toUpperCase()}]</span>;
 }
 
 export function UserStatus({ status }) {
