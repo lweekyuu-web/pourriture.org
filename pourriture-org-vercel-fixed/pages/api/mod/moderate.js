@@ -9,11 +9,8 @@ export default async function handler(req, res) {
 
   const { action, postId, threadId, userId, reportId } = req.body;
   const uid = getUidFromReq(req);
-
   const log = async (act, targetType, targetId, reason) => {
-    await prisma.moderationAction.create({
-      data: { moderatorId: uid, action: act, targetType, targetId: String(targetId), reason },
-    });
+    await prisma.moderationAction.create({ data: { moderatorId: uid, action: act, targetType, targetId: String(targetId), reason } });
   };
 
   if (action === 'hide_post') {
@@ -55,6 +52,18 @@ export default async function handler(req, res) {
   } else if (action === 'unban_user') {
     await prisma.user.update({ where: { id: userId }, data: { banned: false, badge: 'Newbie', status: 'Regular' } });
     await log('unban_user', 'user', userId);
+  } else if (action === 'hide_user') {
+    await prisma.user.update({ where: { id: userId }, data: { status: 'Hidden' } });
+    await log('hide_user', 'user', userId);
+  } else if (action === 'restore_user') {
+    await prisma.user.update({ where: { id: userId }, data: { status: 'Regular' } });
+    await log('restore_user', 'user', userId);
+  } else if (action === 'delete_user') {
+    await prisma.$transaction([
+      prisma.post.updateMany({ where: { authorId: userId }, data: { authorId: null, displayName: 'Deleted user', hidden: true, status: 'deleted' } }),
+      prisma.user.update({ where: { id: userId }, data: { displayName: 'Deleted user', recoveryKeyHash: null, banned: true, status: 'Deleted' } }),
+    ]);
+    await log('delete_user', 'user', userId);
   } else if (action === 'resolve_report') {
     await prisma.report.update({ where: { id: reportId }, data: { status: 'resolved', resolvedAt: new Date(), resolvedBy: uid } });
     await log('resolve_report', 'report', reportId);
