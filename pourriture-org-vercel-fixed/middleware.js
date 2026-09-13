@@ -3,11 +3,13 @@ import { NextResponse } from 'next/server';
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
-  // Keep the maintenance status endpoint, Next internals and the maintenance
-  // screen itself reachable while the rest of the site is closed.
+  // These routes must remain reachable so an administrator can log in,
+  // inspect the maintenance screen and turn the site back on.
   if (
     pathname === '/maintenance' ||
     pathname === '/api/maintenance' ||
+    pathname === '/admin/login' ||
+    pathname === '/api/admin/login' ||
     pathname.startsWith('/_next/') ||
     pathname === '/favicon.ico'
   ) {
