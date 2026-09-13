@@ -25,6 +25,12 @@ export default async function handler(req, res) {
   } else if (action === 'delete_post') {
     await prisma.post.delete({ where: { id: postId } });
     await log('delete_post', 'post', postId);
+  } else if (action === 'approve_review') {
+    await prisma.post.update({ where: { id: postId }, data: { hidden: false, status: 'active' } });
+    await log('approve_review', 'post', postId);
+  } else if (action === 'reject_review') {
+    await prisma.post.update({ where: { id: postId }, data: { hidden: true, status: 'rejected' } });
+    await log('reject_review', 'post', postId);
   } else if (action === 'lock_thread') {
     await prisma.thread.update({ where: { id: threadId }, data: { locked: true } });
     await log('lock_thread', 'thread', threadId);
