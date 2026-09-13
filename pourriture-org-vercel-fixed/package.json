@@ -7,6 +7,7 @@
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "seed": "node prisma/seed.js",
+    "seed:legacy": "node prisma/legacySeed.js",
     "db:reset": "npx prisma db push --force-reset && node prisma/seed.js"
   },
   "dependencies": {
