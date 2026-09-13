@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma';
 import { generateAnonId, generateRecoveryKey, hashKey, getUidFromReq, setUidCookie } from '../../lib/identity';
+import { isAdminRequest } from '../../lib/admin';
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -26,9 +27,11 @@ export default async function handler(req, res) {
     setUidCookie(res, user.id);
     return res.status(200).json({
       anonId: user.anonId,
+      displayName: user.displayName || '',
       badge: user.badge,
       createdAt: user.createdAt,
       recoveryKey,
+      isAdmin: isAdminRequest(req),
       isNew: true,
     });
   }
@@ -40,9 +43,11 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     anonId: user.anonId,
+    displayName: user.displayName || '',
     badge: user.badge,
     createdAt: user.createdAt,
     postCount: user.postCount,
+    isAdmin: isAdminRequest(req),
     isNew: false,
   });
 }
