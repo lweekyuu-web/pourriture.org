@@ -5,7 +5,7 @@ const DEFAULTS = {
   site_title: 'POURRITURE.ORG',
   site_tagline: 'a slow forgotten corner of the internet',
   motd: '',
-  footer_text: 'pourriture.org — prototype expérimental — contenu fictif',
+  footer_text: 'pourriture.org — community forum',
   rules_text: 'Be excellent to each other. No real names, no real addresses, no real threats.',
   threads_per_page: '10',
   archive_after_days: '365',
