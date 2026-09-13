@@ -8,19 +8,9 @@ import WidgetSlot from '../components/WidgetSlot';
 import styles from '../styles/home.module.css';
 
 export async function getServerSideProps({ req }) {
-  const boards = await prisma.board.findMany({
-    where: { status: 'public' },
-    include: { threads: { orderBy: { createdAt: 'desc' }, take: 1, include: { posts: { orderBy: { createdAt: 'desc' }, take: 1 } } } },
-    orderBy: [{ featured: 'desc' }, { id: 'asc' }],
-  });
-  const boardData = await Promise.all(boards.map(async b => {
-    const threadCount = await prisma.thread.count({ where: { boardId: b.id } });
-    const last = b.threads[0], lastPost = last?.posts?.[0];
-    return { id: b.id, name: b.name, description: b.description, featured: b.featured, threadCount, lastActivity: lastPost ? lastPost.createdAt.toISOString() : b.createdAt.toISOString() };
-  }));
-  const [topWidgets, bottomWidgets, settings, totalThreads, totalUsers] = await Promise.all([
-    getWidgetsForSlot('home_top'), getWidgetsForSlot('home_bottom'), getAllSettings(), prisma.thread.count(), prisma.user.count()
-  ]);
+  const boards = await prisma.board.findMany({ where: { status: 'public' }, include: { threads: { orderBy: { createdAt: 'desc' }, take: 1, include: { posts: { orderBy: { createdAt: 'desc' }, take: 1 } } } }, orderBy: [{ featured: 'desc' }, { id: 'asc' }] });
+  const boardData = await Promise.all(boards.map(async b => { const threadCount = await prisma.thread.count({ where: { boardId: b.id } }); const last = b.threads[0], lastPost = last?.posts?.[0]; return { id: b.id, name: b.name, description: b.description, featured: b.featured, threadCount, lastActivity: lastPost ? lastPost.createdAt.toISOString() : b.createdAt.toISOString() }; }));
+  const [topWidgets, bottomWidgets, settings, totalThreads, totalUsers] = await Promise.all([getWidgetsForSlot('home_top'), getWidgetsForSlot('home_bottom'), getAllSettings(), prisma.thread.count(), prisma.user.count()]);
   return { props: { boards: JSON.parse(JSON.stringify(boardData)), topWidgets, bottomWidgets, settings, isAdmin: isAdminRequest(req), totalThreads, totalUsers } };
 }
 
@@ -32,7 +22,7 @@ export default function Home({ boards, topWidgets, bottomWidgets, settings, isAd
   function jump(e) { e.preventDefault(); if (jumpBoard) window.location.href = `/${jumpBoard.replace(/\//g, '')}`; }
   async function saveMotd() { const res = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ motd: motdValue }) }); if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 1500); setEditingMotd(false); window.location.reload(); } }
   return <>
-    <div className="topnav">[<Link href="/"><a>Home</a></Link>] [<Link href="/catalog"><a>Catalog</a></Link>] [<Link href="/archive"><a>Archive</a></Link>] [<Link href="/request-board"><a>Request a board</a></Link>] [<Link href="/recover"><a>Recover identity</a></Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]</div>
+    <div className="topnav">[<Link href="/"><a>Home</a></Link>] [<Link href="/catalog"><a>Catalog</a></Link>] [<Link href="/archive"><a>Archive</a></Link>] [<Link href="/request-board"><a>Request a board</a></Link>] [<Link href="/contact-admin"><a>Contact admin</a></Link>] [<Link href="/recover"><a>Recover identity</a></Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]</div>
     <div className="container">
       <div className="site-logo-text"><div className="wordmark">{settings.site_title}</div><div className="est-line">est. unknown — a place on the internet</div></div>
       <div className="subtitle">{settings.site_tagline}</div>
