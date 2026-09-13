@@ -10,7 +10,25 @@ export async function getServerSideProps({ params, req }) {
   const threadId = parseInt(params.id, 10);
   const thread = await prisma.thread.findUnique({
     where: { id: threadId },
-    include: { posts: { orderBy: { createdAt: 'asc' } }, board: true },
+    include: {
+      posts: {
+        orderBy: { createdAt: 'asc' },
+        include: {
+          author: {
+            select: {
+              anonId: true,
+              displayName: true,
+              badge: true,
+              avatarUrl: true,
+              avatarStatus: true,
+              profileNameColor: true,
+              profileNameStyle: true,
+            },
+          },
+        },
+      },
+      board: true,
+    },
   });
   if (!thread) return { notFound: true };
 
@@ -38,6 +56,16 @@ function fmt(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', timeZone: 'utc' }) +
     ' ' + d.toLocaleTimeString('en-GB', { timeZone: 'utc' });
+}
+
+function nameStyle(author) {
+  if (!author) return {};
+  const style = author.profileNameStyle || 'normal';
+  return {
+    color: author.profileNameColor || '#117743',
+    fontWeight: style === 'bold' || style === 'bold-italic' ? 'bold' : 'normal',
+    fontStyle: style === 'italic' || style === 'bold-italic' ? 'italic' : 'normal',
+  };
 }
 
 export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidgets, isMod }) {
@@ -112,35 +140,43 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
 
         <WidgetSlot widgets={topWidgets} />
 
-        {posts.map((p, idx) => (
-          <div className={`post ${collapsed[p.id] ? 'post-collapsed' : ''}`} id={`post-${p.id}`} key={p.id}>
-            <div className="post-head">
-              <input type="checkbox" />{' '}
-              <span className="name">{p.displayName}</span>
-              {idx === 0 && <span className="badge op-badge">[OP]</span>}
-              <span className="date">{fmt(p.createdAt)}</span>
-              <span className="postnum">No.{p.postNumber}</span>
-              {p.editedAt && <span className="muted"> (edited {fmt(p.editedAt)})</span>}
-              <a href="#" className="collapse-link" onClick={(e) => { e.preventDefault(); setCollapsed({ ...collapsed, [p.id]: !collapsed[p.id] }); }}>
-                [{collapsed[p.id] ? '+' : '−'}]
-              </a>
-            </div>
-
-            {!collapsed[p.id] && <>
-              {p.replyToId && <div className="quote"><a href="#" onClick={(e) => { e.preventDefault(); jumpTo(p.replyToId); }}>&gt;&gt;{p.replyToId}</a></div>}
-              <div className="content">{p.hidden ? '[post removed by moderator]' : p.content}</div>
-              {p.gifUrl && !p.hidden && <div className="post-gif"><img src={p.gifUrl} alt="GIF" loading="lazy" /></div>}
-              <div className="actions">
-                {!thread.locked && !thread.archived && <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(p.id); }}>[Reply]</a>}
-                <a href="#" onClick={(e) => { e.preventDefault(); report(p.id); }}>[Report]</a>
-                {isMod && <>
-                  {' '}<a href="#" onClick={(e) => { e.preventDefault(); modAction(p.hidden ? 'restore_post' : 'hide_post', p.id); }}>[{p.hidden ? 'Restore' : 'Hide'}]</a>
-                  {' '}<a href="#" onClick={(e) => { e.preventDefault(); if (confirm('Delete this post?')) modAction('delete_post', p.id); }}>[Delete]</a>
-                </>}
+        {posts.map((p, idx) => {
+          const author = p.author;
+          const avatarVisible = author?.avatarUrl && author.avatarStatus === 'approved';
+          const badge = author?.badge && author.badge !== 'Newbie' ? author.badge : (author?.badge || '');
+          return (
+            <div className={`post ${collapsed[p.id] ? 'post-collapsed' : ''}`} id={`post-${p.id}`} key={p.id}>
+              <div className="post-head">
+                {avatarVisible && <img className="post-avatar" src={author.avatarUrl} alt="" loading="lazy" />}
+                <input type="checkbox" />{' '}
+                <a className="name post-author-name" style={nameStyle(author)} href={author ? `/user/${author.anonId}` : '#'} onClick={!author ? (e) => e.preventDefault() : undefined}>{p.displayName}</a>
+                {author?.anonId && <span className="anon-post-id"> ({author.anonId})</span>}
+                {badge && <span className="post-badge"> [{badge}]</span>}
+                {idx === 0 && <span className="badge op-badge">[OP]</span>}
+                <span className="date">{fmt(p.createdAt)}</span>
+                <span className="postnum">No.{p.postNumber}</span>
+                {p.editedAt && <span className="muted"> (edited {fmt(p.editedAt)})</span>}
+                <a href="#" className="collapse-link" onClick={(e) => { e.preventDefault(); setCollapsed({ ...collapsed, [p.id]: !collapsed[p.id] }); }}>
+                  [{collapsed[p.id] ? '+' : '−'}]
+                </a>
               </div>
-            </>}
-          </div>
-        ))}
+
+              {!collapsed[p.id] && <>
+                {p.replyToId && <div className="quote"><a href="#" onClick={(e) => { e.preventDefault(); jumpTo(p.replyToId); }}>&gt;&gt;{p.replyToId}</a></div>}
+                <div className="content">{p.hidden ? '[post removed by moderator]' : p.content}</div>
+                {p.gifUrl && !p.hidden && <div className="post-gif"><img src={p.gifUrl} alt="GIF" loading="lazy" /></div>}
+                <div className="actions">
+                  {!thread.locked && !thread.archived && <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(p.id); }}>[Reply]</a>}
+                  <a href="#" onClick={(e) => { e.preventDefault(); report(p.id); }}>[Report]</a>
+                  {isMod && <>
+                    {' '}<a href="#" onClick={(e) => { e.preventDefault(); modAction(p.hidden ? 'restore_post' : 'hide_post', p.id); }}>[{p.hidden ? 'Restore' : 'Hide'}]</a>
+                    {' '}<a href="#" onClick={(e) => { e.preventDefault(); if (confirm('Delete this post?')) modAction('delete_post', p.id); }}>[Delete]</a>
+                  </>}
+                </div>
+              </>}
+            </div>
+          );
+        })}
 
         {!thread.locked && !thread.archived ? (
           <div className="post">
