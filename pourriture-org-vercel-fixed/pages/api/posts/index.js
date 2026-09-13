@@ -13,16 +13,12 @@ function isAllowedGif(url) {
 }
 
 async function moderateInput(message, gifUrl) {
-  if (!process.env.OPENAI_API_KEY) {
-    return { textFlagged: false, gifFlagged: false, aiAvailable: false };
-  }
-
+  if (!process.env.OPENAI_API_KEY) return { textFlagged: false, gifFlagged: false, aiAvailable: false };
   try {
     const input = [];
     if (message) input.push({ type: 'text', text: message });
     if (gifUrl) input.push({ type: 'image_url', image_url: { url: gifUrl } });
     if (!input.length) return { textFlagged: false, gifFlagged: false, aiAvailable: true };
-
     const response = await fetch('https://api.openai.com/v1/moderations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
@@ -32,8 +28,8 @@ async function moderateInput(message, gifUrl) {
     const data = await response.json();
     const results = data.results || [];
     return {
-      textFlagged: !!results.find((r) => r.flagged && input[results.indexOf(r)]?.type === 'text'),
-      gifFlagged: !!results.find((r) => r.flagged && input[results.indexOf(r)]?.type === 'image_url'),
+      textFlagged: Boolean(results[0]?.flagged && input[0]?.type === 'text') || Boolean(results[1]?.flagged && input[1]?.type === 'text'),
+      gifFlagged: Boolean(results[0]?.flagged && input[0]?.type === 'image_url') || Boolean(results[1]?.flagged && input[1]?.type === 'image_url'),
       aiAvailable: true,
     };
   } catch (_) {
@@ -43,7 +39,6 @@ async function moderateInput(message, gifUrl) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-
   const { threadId, name, message, replyToId, gifUrl } = req.body;
   if ((!message || !message.trim()) && !gifUrl) return res.status(400).json({ error: 'Message or GIF required' });
   if (gifUrl && !isAllowedGif(gifUrl)) return res.status(400).json({ error: 'Only GIFs returned by the configured GIF provider are allowed.' });
@@ -57,19 +52,23 @@ export default async function handler(req, res) {
   if (await isFlooding(uid)) return res.status(429).json({ error: 'You are posting too fast. Please slow down.' });
 
   const cleanMessage = String(message || '').trim();
-  if (cleanMessage && containsBannedContent(cleanMessage)) {
-    return res.status(400).json({ error: 'Your message was rejected by the content filter.' });
-  }
+  if (cleanMessage && containsBannedContent(cleanMessage)) return res.status(400).json({ error: 'Your message was rejected by the content filter.' });
 
   const ai = await moderateInput(cleanMessage, gifUrl);
   const heldForReview = Boolean(gifUrl) || ai.textFlagged || ai.gifFlagged;
   const reviewReason = ai.gifFlagged || ai.textFlagged ? 'AI moderation flagged this submission; moderator review required.' : (gifUrl ? 'GIF posts are held for moderator review.' : null);
 
+  let authorDisplayName = name?.trim() || 'Anonymous';
+  if (uid) {
+    const author = await prisma.user.findUnique({ where: { id: uid }, select: { displayName: true } });
+    if (author?.displayName?.trim()) authorDisplayName = author.displayName.trim();
+  }
+
   const post = await prisma.post.create({
     data: {
       postNumber: generatePostNumber(),
       threadId,
-      displayName: name?.trim() || 'Anonymous',
+      displayName: authorDisplayName,
       content: cleanMessage,
       gifUrl: gifUrl || null,
       replyToId: replyToId || null,
@@ -84,25 +83,8 @@ export default async function handler(req, res) {
 
   const postWithAuthor = await prisma.post.findUnique({
     where: { id: post.id },
-    include: {
-      author: {
-        select: {
-          anonId: true,
-          displayName: true,
-          badge: true,
-          avatarUrl: true,
-          avatarStatus: true,
-          profileNameColor: true,
-          profileNameStyle: true,
-        },
-      },
-    },
+    include: { author: { select: { anonId: true, displayName: true, badge: true, avatarUrl: true, avatarStatus: true, profileNameColor: true, profileNameStyle: true } } },
   });
 
-  return res.status(201).json({
-    post: JSON.parse(JSON.stringify(postWithAuthor)),
-    review: heldForReview,
-    reviewReason,
-    aiModerated: ai.aiAvailable,
-  });
+  return res.status(201).json({ post: JSON.parse(JSON.stringify(postWithAuthor)), review: heldForReview, reviewReason, aiModerated: ai.aiAvailable });
 }
