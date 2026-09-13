@@ -12,6 +12,35 @@ function isAllowedGif(url) {
   }
 }
 
+async function moderateInput(message, gifUrl) {
+  if (!process.env.OPENAI_API_KEY) {
+    return { textFlagged: false, gifFlagged: false, aiAvailable: false };
+  }
+
+  try {
+    const input = [];
+    if (message) input.push({ type: 'text', text: message });
+    if (gifUrl) input.push({ type: 'image_url', image_url: { url: gifUrl } });
+    if (!input.length) return { textFlagged: false, gifFlagged: false, aiAvailable: true };
+
+    const response = await fetch('https://api.openai.com/v1/moderations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model: 'omni-moderation-latest', input }),
+    });
+    if (!response.ok) return { textFlagged: false, gifFlagged: false, aiAvailable: false };
+    const data = await response.json();
+    const results = data.results || [];
+    return {
+      textFlagged: !!results.find((r) => r.flagged && input[results.indexOf(r)]?.type === 'text'),
+      gifFlagged: !!results.find((r) => r.flagged && input[results.indexOf(r)]?.type === 'image_url'),
+      aiAvailable: true,
+    };
+  } catch (_) {
+    return { textFlagged: false, gifFlagged: false, aiAvailable: false };
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -32,7 +61,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Your message was rejected by the content filter.' });
   }
 
-  const heldForReview = Boolean(gifUrl);
+  const ai = await moderateInput(cleanMessage, gifUrl);
+  const heldForReview = Boolean(gifUrl) || ai.textFlagged || ai.gifFlagged;
+  const reviewReason = ai.gifFlagged || ai.textFlagged ? 'AI moderation flagged this submission; moderator review required.' : (gifUrl ? 'GIF posts are held for moderator review.' : null);
+
   const post = await prisma.post.create({
     data: {
       postNumber: generatePostNumber(),
@@ -53,5 +85,7 @@ export default async function handler(req, res) {
   return res.status(201).json({
     post: JSON.parse(JSON.stringify(post)),
     review: heldForReview,
+    reviewReason,
+    aiModerated: ai.aiAvailable,
   });
 }
