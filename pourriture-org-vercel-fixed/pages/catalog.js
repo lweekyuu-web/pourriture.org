@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import prisma from '../lib/prisma';
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ query }) {
+  const filter = ['active', 'all', 'recent'].includes(query.filter) ? query.filter : 'active';
+  const where = filter === 'active' ? { status: 'public' } : {};
   const boards = await prisma.board.findMany({
-    where: { status: 'public' },
-    orderBy: { id: 'asc' },
+    where,
+    orderBy: filter === 'recent' ? { createdAt: 'desc' } : { id: 'asc' },
   });
 
   const boardData = await Promise.all(
@@ -20,6 +22,7 @@ export async function getServerSideProps() {
       return {
         id: b.id,
         name: b.name,
+        status: b.status,
         threadCount,
         postCount,
         lastActivity: lastPost ? lastPost.createdAt.toISOString() : null,
@@ -27,7 +30,7 @@ export async function getServerSideProps() {
     })
   );
 
-  return { props: { boards: JSON.parse(JSON.stringify(boardData)) } };
+  return { props: { boards: JSON.parse(JSON.stringify(boardData)), filter } };
 }
 
 function fmt(dateStr) {
@@ -37,17 +40,18 @@ function fmt(dateStr) {
     ' ' + d.toLocaleTimeString('en-GB', { timeZone: 'utc' });
 }
 
-export default function Catalog({ boards }) {
+export default function Catalog({ boards, filter }) {
   return (
     <div className="container">
       <div className="topnav">
-        [<Link href="/">Return</Link>] [<a href="#bottom">Bottom</a>] [<a href="/">Update</a>]
+        [<Link href="/">Return</Link>] [<a href="#bottom">Bottom</a>] [<Link href="/catalog">Update</Link>]
       </div>
       <h1 className="sitetitle">BOARD LIST</h1>
-      <div className="subtitle">All public boards on pourriture.org</div>
+      <div className="subtitle">All boards known to pourriture.org</div>
 
       <div className="catalog-filters">
-        [<a href="#">Show Active</a>] [<a href="#">Show All</a>] [<a href="#">Recently Updated</a>]
+        [<Link href="/catalog?filter=active">Show Active</Link>] [<Link href="/catalog?filter=all">Show All</Link>] [<Link href="/catalog?filter=recent">Recently Created</Link>]
+        {' '}<span className="muted">Current: {filter}</span>
       </div>
 
       <table className="admin">
@@ -55,6 +59,7 @@ export default function Catalog({ boards }) {
           <tr>
             <th>Board</th>
             <th>Name</th>
+            <th>Status</th>
             <th>Threads</th>
             <th>Posts</th>
             <th>Last Activity</th>
@@ -65,6 +70,7 @@ export default function Catalog({ boards }) {
             <tr key={b.id}>
               <td><Link href={`/${b.id.replace(/\//g, '')}`}>{b.id}</Link></td>
               <td>{b.name}</td>
+              <td>{b.status}</td>
               <td>{b.threadCount}</td>
               <td>{b.postCount}</td>
               <td>{fmt(b.lastActivity)}</td>
