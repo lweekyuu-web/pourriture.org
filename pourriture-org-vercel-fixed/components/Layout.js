@@ -12,6 +12,8 @@ export function SiteHeader({ isAdmin }) {
       .catch(() => {});
   }, []);
 
+  const adminVisible = Boolean(isAdmin || identity?.isAdmin);
+
   return (
     <div className="site-header">
       <div className="site-header-logo">
@@ -23,13 +25,15 @@ export function SiteHeader({ isAdmin }) {
         [<Link href="/catalog">Catalog</Link>]{' '}
         [<Link href="/search">Search</Link>]{' '}
         [<Link href="/faq">FAQ</Link>]{' '}
-        [<Link href="/rules">Rules</Link>]
-        {identity && <> {' '}[<Link href={`/user/${identity.anonId}`}>Profile</Link>] [<Link href="/profile/edit">Edit profile</Link>]</>}
-        {isAdmin && ' '}[<Link href="/admin">Admin</Link>]
+        [<Link href="/rules">Rules</Link>]{' '}
+        [<Link href="/request-board">Request board</Link>]{' '}
+        [<Link href="/recover">Recover identity</Link>]
+        {identity && <> {' '}[<Link href="/profile/friends">Friends</Link>] [<Link href="/messages">Messages</Link>] [<Link href={`/user/${identity.anonId}`}>Profile</Link>] [<Link href="/profile/edit">Edit profile</Link>]</>}
+        {adminVisible && <> {' '}[<Link href="/admin">Admin</Link>]</>}
       </div>
       <div className="site-header-identity">
         {identity ? (
-          <span className="anon-id"><Link href={`/user/${identity.anonId}`}>Anonymous #{identity.anonId}</Link></span>
+          <span className="anon-id"><Link href={`/user/${identity.anonId}`}>{identity.displayName?.trim() || 'Anonymous'} #{identity.anonId}</Link></span>
         ) : (
           <span className="anon-id">Anonymous</span>
         )}
