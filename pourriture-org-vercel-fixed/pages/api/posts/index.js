@@ -82,8 +82,25 @@ export default async function handler(req, res) {
   await prisma.thread.update({ where: { id: threadId }, data: { bumpedAt: new Date() } });
   if (uid) await prisma.user.update({ where: { id: uid }, data: { postCount: { increment: 1 } } });
 
+  const postWithAuthor = await prisma.post.findUnique({
+    where: { id: post.id },
+    include: {
+      author: {
+        select: {
+          anonId: true,
+          displayName: true,
+          badge: true,
+          avatarUrl: true,
+          avatarStatus: true,
+          profileNameColor: true,
+          profileNameStyle: true,
+        },
+      },
+    },
+  });
+
   return res.status(201).json({
-    post: JSON.parse(JSON.stringify(post)),
+    post: JSON.parse(JSON.stringify(postWithAuthor)),
     review: heldForReview,
     reviewReason,
     aiModerated: ai.aiAvailable,
