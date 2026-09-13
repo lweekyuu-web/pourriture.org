@@ -1,28 +1,4 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-export default function Messages() {
-  const [messages, setMessages] = useState([]);
-  const [target, setTarget] = useState('');
-  const [content, setContent] = useState('');
-  const [error, setError] = useState('');
-  async function load() {
-    const r = await fetch('/api/messages'); const d = await r.json().catch(() => ({}));
-    if (r.ok) setMessages(d.messages || []); else setError(d.error || 'Unable to load messages.');
-  }
-  useEffect(() => { load(); }, []);
-  async function send(e) {
-    e.preventDefault(); setError(''); if (!target.trim() || !content.trim()) return;
-    const r = await fetch('/api/messages', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ anonId: target, content }) });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) setError(d.error || 'Unable to send.'); else { setContent(''); await load(); }
-  }
-  return <main className="container">
-    <div className="topnav">[<Link href="/">Home</Link>] [<Link href="/profile/friends">Friends</Link>] [<Link href="/profile/edit">My profile</Link>]</div>
-    <h1 className="sitetitle">MESSAGES</h1>
-    {error && <p className="notification">{error}</p>}
-    <div className="post"><b>New message</b><form onSubmit={send}><p><input value={target} onChange={e=>setTarget(e.target.value)} placeholder="Anonymous ID" maxLength={20} /></p><textarea rows={5} value={content} onChange={e=>setContent(e.target.value)} maxLength={2000} style={{width:'100%'}} /><p><button>[ Send ]</button></p></form></div>
-    {messages.length === 0 && <p className="muted">No messages yet.</p>}
-    {messages.map(m => <div className="post" key={m.id}><b>{m.sender.anonId === m.meId ? 'To' : 'From'}: </b><Link href={`/user/${m.sender.anonId}`}>{m.sender.displayName || 'Anonymous'}</Link> <span className="muted">#{m.sender.anonId}</span><p style={{whiteSpace:'pre-wrap'}}>{m.content}</p><small>{new Date(m.createdAt).toLocaleString()}</small></div>)}
-  </main>;
-}
+import { useRouter } from 'next/router';
+export default function Messages(){const router=useRouter();const[messages,setMessages]=useState([]),[target,setTarget]=useState(''),[content,setContent]=useState(''),[error,setError]=useState('');async function load(){const r=await fetch('/api/messages');const d=await r.json().catch(()=>({}));if(r.ok)setMessages(d.messages||[]);else setError(d.error||'Unable to load messages.')}useEffect(()=>{load()},[]);useEffect(()=>{if(router.query.to)setTarget(String(router.query.to))},[router.query.to]);async function send(e){e.preventDefault();if(!target.trim()||!content.trim())return;const r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anonId:target,content})});const d=await r.json().catch(()=>({}));if(!r.ok)setError(d.error||'Unable to send.');else{setContent('');load()}}const grouped={};messages.forEach(m=>{const id=m.other?.anonId||m.sender?.anonId;if(id)(grouped[id]??=[]).push(m)});return <main className="container"><div className="topnav">[<Link href="/">Home</Link>] [<Link href="/profile/friends">Friends</Link>] [<Link href="/profile/edit">My profile</Link>]</div><h1 className="sitetitle">MESSAGES</h1>{error&&<p className="notification">{error}</p>}<div className="post"><b>NEW MESSAGE</b><form onSubmit={send}><p>To: <input value={target} onChange={e=>setTarget(e.target.value)} placeholder="Anonymous ID" maxLength={20}/></p><textarea rows={5} value={content} onChange={e=>setContent(e.target.value)} maxLength={2000} style={{width:'100%'}}/><p><button type="submit">[ Send ]</button></p></form></div>{Object.keys(grouped).length===0?<p className="muted">No messages yet.</p>:Object.entries(grouped).map(([id,list])=><div className="post" key={id}><b>CHAT WITH <Link href={`/user/${id}`}>{list[0].other?.displayName||'Anonymous'}</Link></b> <span className="muted">#{id}</span>{list.map(m=><div key={m.id} style={{marginTop:8,paddingTop:5,borderTop:'1px solid #ddd'}}><span className="muted">{m.senderId===m.meId?'You':'Them'} — {new Date(m.createdAt).toLocaleString()}</span><div style={{whiteSpace:'pre-wrap'}}>{m.content}</div></div>)}</div>)}</main>}
