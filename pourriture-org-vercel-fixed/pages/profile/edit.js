@@ -44,7 +44,6 @@ export default function EditProfile() {
 
   return (
     <main className={`container profile-theme-${form.profileTheme || 'classic'}`}>
-      <div className="topnav">[<Link href="/">Home</Link>] [<Link href={`/user/${form.anonId}`}>My profile</Link>] [<Link href="/recover">Recover identity</Link>]</div>
       <div className={styles.editorShell}>
         <div className={styles.pageHead}>
           <h1 className="sitetitle">MY PROFILE</h1>
