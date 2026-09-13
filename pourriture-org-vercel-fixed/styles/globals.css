@@ -43,8 +43,7 @@ h2.mod-subtitle { text-align: center; font-size: 14px; color: #555; margin: 0 0 
 .pagination a { margin: 0 3px; }
 .pagination .page-current { margin: 0 3px; font-weight: bold; color: #af0a0f; }
 .post { border: 1px solid #b7c5d9; background: #f9f9ff; padding: 6px 8px; margin-bottom: 6px; }
-.post .head { font-size: 12px; margin-bottom: 4px; }
-.post .post-head { font-size: 12px; margin-bottom: 4px; }
+.post .head, .post .post-head { font-size: 12px; margin-bottom: 4px; }
 .post .name { color: #117743; font-weight: bold; }
 .post .badge { font-size: 10px; border: 1px solid #999; padding: 0 3px; margin-left: 4px; background: #e0e0e0; }
 .post .op-badge { color: #af0a0f; border-color: #af0a0f; background: #fff0f0; }
@@ -115,8 +114,7 @@ table.admin th { background: #d6daf0; }
 .rules-section h3, .faq-section h3 { font-size: 14px; color: #333; margin: 14px 0 6px 0; font-family: Tahoma, sans-serif; }
 .rules-text { font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; margin: 4px 0; }
 .board-rules { border: 1px solid #d9c46a; background: #fff8d6; padding: 6px 8px; margin-bottom: 10px; font-size: 12px; }
-.last-modified { font-size: 10px; color: #999; margin-top: 20px; font-style: italic; }
-.archive-note { font-size: 10px; color: #999; margin-top: 20px; font-style: italic; }
+.last-modified, .archive-note { font-size: 10px; color: #999; margin-top: 20px; font-style: italic; }
 .error-page { text-align: center; padding: 40px 0; }
 .error-page h2 { font-size: 18px; color: #af0a0f; font-family: Arial, sans-serif; }
 .locked-notice { text-align: center; color: #af0a0f; font-size: 12px; padding: 10px; }
@@ -126,8 +124,6 @@ table.admin th { background: #d6daf0; }
 .perm-list label { display: inline-block; margin-right: 12px; font-size: 11px; }
 .report-item { border-color: #d9c46a; }
 .muted { color: #999; font-size: 11px; }
-
-/* Extra old-imageboard flavor: customizable, noisy, slightly tacky, but still readable. */
 .profile-theme-red .profile-header, .profile-theme-red .profile-bio { background: #fff0f0; border-color: #c99; }
 .profile-theme-purple .profile-header, .profile-theme-purple .profile-bio { background: #f5efff; border-color: #b8a3d1; }
 .profile-layout-imageboard .profile-header { border-style: dotted; box-shadow: 2px 2px 0 #aaa; }
@@ -142,6 +138,22 @@ table.admin th { background: #d6daf0; }
 .badge-hot { color: #b00000 !important; border-color: #b00000 !important; background: #ffe4e4 !important; }
 .badge-sparkle { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor; }
 .badge-admin { border: 1px solid #555; background: #ddd; }
+
+/* Profile / MySpace additions */
+.profile-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr); gap: 10px; }
+.profile-box { border: 1px solid #b7c5d9; background: #f9f9ff; padding: 6px 8px; }
+.profile-box-title { font-weight: bold; font-size: 11px; color: #af0a0f; border-bottom: 1px solid #b7c5d9; margin: -2px 0 6px; padding-bottom: 2px; text-transform: uppercase; }
+.profile-badges { line-height: 1.9; }
+.profile-badge-list { line-height: 2; }
+.profile-badge-list small { font-size: 9px; color: #777; }
+.profile-friend-action { margin-top: 7px; }
+.friend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.friend-tile { display: block; text-align: center; border: 1px solid #c4cada; background: #fff; padding: 4px; font-size: 10px; min-width: 0; }
+.friend-tile img, .friend-avatar { width: 54px; height: 54px; object-fit: cover; display: block; margin: 0 auto 3px; border: 1px solid #999; background: #eee; }
+.friend-avatar { line-height: 54px; font-size: 18px; color: #888; }
+.friend-row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.friend-actions { white-space: nowrap; }
+
 @media (max-width: 600px) {
   body { font-size: 12px; }
   .site-header-nav { display: block; }
@@ -159,4 +171,8 @@ table.admin th { background: #d6daf0; }
   .profile-header { align-items: flex-start; }
   .profile-avatar { width: 72px; height: 72px; }
   .profile-title .sitetitle { font-size: 17px; }
+  .profile-columns { grid-template-columns: 1fr; }
+  .friend-grid { grid-template-columns: repeat(3, 1fr); }
+  .friend-row { display: block; }
+  .friend-actions { margin-top: 5px; white-space: normal; }
 }
