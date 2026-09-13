@@ -32,7 +32,7 @@ export default function Home({ boards, topWidgets, bottomWidgets, settings, isAd
   function jump(e) { e.preventDefault(); if (jumpBoard) window.location.href = `/${jumpBoard.replace(/\//g, '')}`; }
   async function saveMotd() { const res = await fetch('/api/admin/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ motd: motdValue }) }); if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 1500); setEditingMotd(false); window.location.reload(); } }
   return <>
-    <div className="topnav">[<Link href="/"><a>Home</a></Link>] [<Link href="/catalog"><a>Catalog</a></Link>] [<Link href="/archive"><a>Archive</a></Link>] [<Link href="/request-board"><a>Request a board</a></Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]</div>
+    <div className="topnav">[<Link href="/"><a>Home</a></Link>] [<Link href="/catalog"><a>Catalog</a></Link>] [<Link href="/archive"><a>Archive</a></Link>] [<Link href="/request-board"><a>Request a board</a></Link>] [<Link href="/recover"><a>Recover identity</a></Link>] [<a href="#bottom">Bottom</a>] [<a href="/" onClick={handleUpdateClick}>Update</a>]</div>
     <div className="container">
       <div className="site-logo-text"><div className="wordmark">{settings.site_title}</div><div className="est-line">est. unknown — a place on the internet</div></div>
       <div className="subtitle">{settings.site_tagline}</div>
