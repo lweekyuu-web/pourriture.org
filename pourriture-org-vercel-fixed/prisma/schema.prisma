@@ -18,6 +18,14 @@ model User {
   anonId          String    @unique
   displayName     String?
   recoveryKeyHash String?
+  bio             String?
+  signature       String?
+  avatarUrl       String?
+  bannerUrl       String?
+  profileTheme    String    @default("classic")
+  profileLayout   String    @default("compact")
+  profileGifUrl   String?
+  avatarStatus    String    @default("approved")
   createdAt       DateTime  @default(now())
   lastLoginAt     DateTime?
   lastLoginIp     String?
@@ -143,7 +151,7 @@ model ModerationAction {
   targetType  String
   targetId    String
   reason      String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Widget {
