@@ -6,11 +6,9 @@ export default async function handler(req, res) {
   const boardId = '/' + req.query.id + '/';
 
   if (req.method === 'PUT') {
-    const { name, description, rules, status } = req.body;
-    const board = await prisma.board.update({
-      where: { id: boardId },
-      data: { name, description, rules, status },
-    });
+    const { name, description, rules, status, featured } = req.body;
+    if (featured) await prisma.board.updateMany({ data: { featured: false } });
+    const board = await prisma.board.update({ where: { id: boardId }, data: { name, description, rules, status, featured: Boolean(featured) } });
     return res.status(200).json(board);
   }
 
