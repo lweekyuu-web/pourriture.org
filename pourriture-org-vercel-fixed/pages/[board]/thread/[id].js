@@ -68,6 +68,10 @@ function nameStyle(author) {
   };
 }
 
+const avatarStyle = { width: 28, height: 28, objectFit: 'cover', border: '1px solid #888', verticalAlign: 'middle', marginRight: 4 };
+const badgeStyle = { display: 'inline-block', fontSize: 10, border: '1px solid #999', padding: '0 3px', marginLeft: 4, background: '#e0e0e0', fontWeight: 'bold' };
+const gifStyle = { maxWidth: 'min(480px, 100%)', maxHeight: 360, display: 'block', border: '1px solid #b7c5d9' };
+
 export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidgets, isMod }) {
   const [replyTo, setReplyTo] = useState(null);
   const [name, setName] = useState('');
@@ -143,15 +147,15 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
         {posts.map((p, idx) => {
           const author = p.author;
           const avatarVisible = author?.avatarUrl && author.avatarStatus === 'approved';
-          const badge = author?.badge && author.badge !== 'Newbie' ? author.badge : (author?.badge || '');
+          const badge = author?.badge || '';
           return (
             <div className={`post ${collapsed[p.id] ? 'post-collapsed' : ''}`} id={`post-${p.id}`} key={p.id}>
               <div className="post-head">
-                {avatarVisible && <img className="post-avatar" src={author.avatarUrl} alt="" loading="lazy" />}
+                {avatarVisible && <img className="post-avatar" style={avatarStyle} src={author.avatarUrl} alt="" loading="lazy" />}
                 <input type="checkbox" />{' '}
                 <a className="name post-author-name" style={nameStyle(author)} href={author ? `/user/${author.anonId}` : '#'} onClick={!author ? (e) => e.preventDefault() : undefined}>{p.displayName}</a>
                 {author?.anonId && <span className="anon-post-id"> ({author.anonId})</span>}
-                {badge && <span className="post-badge"> [{badge}]</span>}
+                {badge && <span className="post-badge" style={badgeStyle}>[{badge}]</span>}
                 {idx === 0 && <span className="badge op-badge">[OP]</span>}
                 <span className="date">{fmt(p.createdAt)}</span>
                 <span className="postnum">No.{p.postNumber}</span>
@@ -164,7 +168,7 @@ export default function ThreadPage({ thread, boardSlug, topWidgets, bottomWidget
               {!collapsed[p.id] && <>
                 {p.replyToId && <div className="quote"><a href="#" onClick={(e) => { e.preventDefault(); jumpTo(p.replyToId); }}>&gt;&gt;{p.replyToId}</a></div>}
                 <div className="content">{p.hidden ? '[post removed by moderator]' : p.content}</div>
-                {p.gifUrl && !p.hidden && <div className="post-gif"><img src={p.gifUrl} alt="GIF" loading="lazy" /></div>}
+                {p.gifUrl && !p.hidden && <div className="post-gif"><img src={p.gifUrl} alt="GIF" loading="lazy" style={gifStyle} /></div>}
                 <div className="actions">
                   {!thread.locked && !thread.archived && <a href="#" onClick={(e) => { e.preventDefault(); setReplyTo(p.id); }}>[Reply]</a>}
                   <a href="#" onClick={(e) => { e.preventDefault(); report(p.id); }}>[Report]</a>
