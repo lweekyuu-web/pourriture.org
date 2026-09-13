@@ -26,6 +26,9 @@ model User {
   profileLayout   String    @default("compact")
   profileGifUrl   String?
   avatarStatus    String    @default("approved")
+  bannerStatus    String    @default("approved")
+  avatarAiFlagged Boolean   @default(false)
+  bannerAiFlagged Boolean   @default(false)
   createdAt       DateTime  @default(now())
   lastLoginAt     DateTime?
   lastLoginIp     String?
