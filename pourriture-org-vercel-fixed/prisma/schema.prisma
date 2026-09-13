@@ -14,40 +14,43 @@ model SiteSetting {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  anonId          String    @unique
-  displayName     String?
-  recoveryKeyHash String?
-  bio             String?
-  signature       String?
-  avatarUrl       String?
-  bannerUrl       String?
-  profileTheme    String    @default("classic")
-  profileLayout   String    @default("compact")
-  profileNameColor String   @default("#117743")
-  profileNameStyle String   @default("normal")
-  profileGifUrl   String?
-  avatarStatus    String    @default("approved")
-  bannerStatus    String    @default("approved")
-  avatarAiFlagged Boolean   @default(false)
-  bannerAiFlagged Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  lastLoginAt     DateTime?
-  lastLoginIp     String?
-  postCount       Int       @default(0)
-  badge           String    @default("Newbie")
-  role            String    @default("user")
-  status          String    @default("New user")
-  banned          Boolean   @default(false)
-  suspendedUntil  DateTime?
-  adminTitle      String?
-  adminPermissions String[] @default([])
-  posts           Post[]
-  warnings        Warning[]
-  modActions      ModerationAction[] @relation("ModeratorActions")
-  boardMods       BoardModerator[]
-  sentMessages    DirectMessage[] @relation("MessageSender")
+  id               String    @id @default(cuid())
+  anonId           String    @unique
+  displayName      String?
+  recoveryKeyHash  String?
+  bio              String?
+  signature        String?
+  avatarUrl        String?
+  bannerUrl        String?
+  profileTheme     String    @default("classic")
+  profileLayout    String    @default("compact")
+  profileNameColor String    @default("#117743")
+  profileNameStyle String    @default("normal")
+  profileGifUrl    String?
+  avatarStatus     String    @default("approved")
+  bannerStatus     String    @default("approved")
+  avatarAiFlagged  Boolean   @default(false)
+  bannerAiFlagged  Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  postCount        Int       @default(0)
+  badge            String    @default("Newbie")
+  role             String    @default("user")
+  status           String    @default("New user")
+  banned           Boolean   @default(false)
+  suspendedUntil   DateTime?
+  adminTitle       String?
+  adminPermissions String[]  @default([])
+  posts            Post[]
+  warnings         Warning[]
+  modActions       ModerationAction[] @relation("ModeratorActions")
+  boardMods        BoardModerator[]
+  sentMessages     DirectMessage[] @relation("MessageSender")
   receivedMessages DirectMessage[] @relation("MessageRecipient")
+  badges           UserBadge[]
+  friendRequestsSent     Friendship[] @relation("FriendshipRequester")
+  friendRequestsReceived Friendship[] @relation("FriendshipRecipient")
 }
 
 model Board {
@@ -136,20 +139,48 @@ model BoardModerator {
   boardId     String
   board       Board    @relation(fields: [boardId], references: [id])
   userId      String
-  user       User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
   permissions String[] @default(["VIEW_REPORTS", "MODERATE_POSTS", "LOCK_THREADS"])
   createdAt   DateTime @default(now())
   @@unique([boardId, userId])
 }
 
 model Badge {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  color       String   @default("#808080")
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  color       String     @default("#808080")
   description String?
-  level       Int      @default(0)
+  level       Int        @default(0)
   requirement String?
+  createdAt   DateTime   @default(now())
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   Int
+  assignedAt DateTime @default(now())
+  assignedBy String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  @@unique([userId, badgeId])
+  @@index([badgeId])
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  recipientId String
+  status      String   @default("pending")
+  topFriend   Boolean  @default(false)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  requester  User     @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient  User     @relation("FriendshipRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  @@unique([requesterId, recipientId])
+  @@index([recipientId, status])
+  @@index([requesterId, status])
 }
 
 model ModerationAction {
@@ -160,7 +191,7 @@ model ModerationAction {
   targetType  String
   targetId    String
   reason      String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model DirectMessage {
