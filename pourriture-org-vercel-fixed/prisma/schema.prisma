@@ -24,6 +24,8 @@ model User {
   bannerUrl       String?
   profileTheme    String    @default("classic")
   profileLayout   String    @default("compact")
+  profileNameColor String   @default("#117743")
+  profileNameStyle String   @default("normal")
   profileGifUrl   String?
   avatarStatus    String    @default("approved")
   bannerStatus    String    @default("approved")
